@@ -10,43 +10,65 @@
     "notifications",
     "scripting",
     "alarms",
-    "activeTab"
+    "activeTab",
+    "webNavigation"
   ],
   "host_permissions": [
     "<all_urls>",
     "https://labs.google/*"
   ],
   "background": {
-    "service_worker": "background.js",
-    "type": "module"
+    "service_worker": "background.js"
   },
   "content_scripts": [
     {
       "matches": [
-        "http://localhost:*/*",
-        "https://*.vercel.app/*"
+        "http://localhost/*",
+        "http://localhost:3000/*",
+        "http://127.0.0.1/*",
+        "https://*.vercel.app/*",
+        "https://texa-canvas.vercel.app/*"
       ],
-      "js": ["contentScript.js"],
+      "js": [
+        "contentScript.js"
+      ],
       "run_at": "document_end"
     },
     {
-      "matches": ["https://labs.google/*"],
-      "js": ["content.js"],
+      "matches": [
+        "https://labs.google/*"
+      ],
+      "js": [
+        "content.js"
+      ],
       "run_at": "document_idle"
     },
     {
-      "matches": ["https://toket.teknoaiglobal.com/*"],
-      "js": ["assets/content.ts-DjRJowkR.js"]
+      "matches": [
+        "https://toket.teknoaiglobal.com/*"
+      ],
+      "js": [
+        "assets/content.ts-DjRJowkR.js"
+      ]
     }
   ],
   "web_accessible_resources": [
     {
-      "resources": ["injectedScript.js"],
-      "matches": ["http://localhost/*", "https://*.vercel.app/*"]
+      "resources": [
+        "injectedScript.js"
+      ],
+      "matches": [
+        "http://localhost/*",
+        "https://*.vercel.app/*"
+      ]
     },
     {
-      "matches": ["https://toket.teknoaiglobal.com/*"],
-      "resources": ["assets/content.ts-DjRJowkR.js"],
+      "matches": [
+        "https://toket.teknoaiglobal.com/*"
+      ],
+      "resources": [
+        "assets/content.ts-DjRJowkR.js"
+      ],
       "use_dynamic_url": false
     }
   ],

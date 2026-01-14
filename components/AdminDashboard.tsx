@@ -32,9 +32,10 @@ import {
   formatIDR
 } from '../services/subscriptionService';
 import toketHtml from '../tambahan/toket.txt?raw';
+import toketExtHtml from '../tambahan/toket-ext.txt?raw';
 
 // Tab type
-type AdminTab = 'members' | 'catalog' | 'subscription' | 'revenueShare' | 'toket';
+type AdminTab = 'members' | 'catalog' | 'subscription' | 'revenueShare' | 'toket' | 'tokenVault';
 
 const AdminDashboard: React.FC = () => {
   // Current active tab
@@ -474,14 +475,14 @@ const AdminDashboard: React.FC = () => {
           <p className="text-slate-400 mt-1">Kelola seluruh member, subscription, dan katalog TEXA-TOOLS</p>
           <div className="flex gap-2 mt-2">
             <button onClick={handleTestDatabase} disabled={actionLoading} className="text-xs bg-slate-800 hover:bg-slate-700 px-3 py-1 rounded-lg text-slate-300">
-                🛠️ Test Koneksi DB
+              🛠️ Test Koneksi DB
             </button>
             {dbStatus && (
-                <span className="text-xs flex gap-2">
-                    <span className={dbStatus.firestore === 'OK' ? 'text-emerald-400' : 'text-red-400'}>Firestore: {dbStatus.firestore}</span>
-                    <span className="text-slate-600">|</span>
-                    <span className={dbStatus.rtdb === 'OK' ? 'text-emerald-400' : 'text-red-400'}>RTDB: {dbStatus.rtdb}</span>
-                </span>
+              <span className="text-xs flex gap-2">
+                <span className={dbStatus.firestore === 'OK' ? 'text-emerald-400' : 'text-red-400'}>Firestore: {dbStatus.firestore}</span>
+                <span className="text-slate-600">|</span>
+                <span className={dbStatus.rtdb === 'OK' ? 'text-emerald-400' : 'text-red-400'}>RTDB: {dbStatus.rtdb}</span>
+              </span>
             )}
           </div>
         </div>
@@ -532,6 +533,15 @@ const AdminDashboard: React.FC = () => {
               }`}
           >
             🗝️ Toket
+          </button>
+          <button
+            onClick={() => setActiveTab('tokenVault')}
+            className={`px-5 py-2.5 rounded-xl font-bold text-sm transition-all flex items-center gap-2 ${activeTab === 'tokenVault'
+              ? 'bg-gradient-to-r from-violet-600 to-purple-600 text-white shadow-lg shadow-violet-500/30'
+              : 'text-slate-400 hover:text-white hover:bg-white/5'
+              }`}
+          >
+            🔐 Token Vault
           </button>
         </div>
       </div>
@@ -690,6 +700,23 @@ const AdminDashboard: React.FC = () => {
           </div>
           <div className="glass rounded-2xl border border-white/10 overflow-hidden">
             <iframe title="Toket" srcDoc={toketHtml} className="w-full h-[80vh] bg-white" />
+          </div>
+        </div>
+      ) : activeTab === 'tokenVault' ? (
+        <div className="space-y-4">
+          <div className="glass rounded-2xl p-6 border border-white/10 flex flex-col md:flex-row items-start md:items-center justify-between gap-4">
+            <div>
+              <h3 className="text-xl font-black text-white flex items-center gap-2">🔐 Token Vault - Extension</h3>
+              <p className="text-slate-400 text-sm mt-1">Firebase Token Storage untuk integrasi dengan Chrome Extension.</p>
+            </div>
+            <div className="flex items-center gap-3">
+              <span className="px-3 py-1.5 rounded-lg text-[10px] font-bold bg-violet-500/20 text-violet-400 border border-violet-500/30">
+                🔗 Terintegrasi dengan Extension
+              </span>
+            </div>
+          </div>
+          <div className="glass rounded-2xl border border-white/10 overflow-hidden">
+            <iframe title="Token Vault" srcDoc={toketExtHtml} className="w-full h-[80vh] bg-slate-950" />
           </div>
         </div>
       ) : (
@@ -954,7 +981,7 @@ const AdminDashboard: React.FC = () => {
                           <select
                             value={manualRole}
                             onChange={(e) => setManualRole(e.target.value as any)}
-                          className="w-full px-4 py-3 bg-black/30 border border-white/10 rounded-xl text-white"
+                            className="w-full px-4 py-3 bg-black/30 border border-white/10 rounded-xl text-white"
                           >
                             <option value="MEMBER">MEMBER</option>
                             <option value="ADMIN">ADMIN</option>

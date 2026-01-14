@@ -131,16 +131,24 @@ export const RTDB_PATHS = {
 } as const;
 
 // ============================================
-// INITIALIZE FIREBASE
+// INITIALIZE FIREBASE - PRIMARY
 // ============================================
 const app: FirebaseApp = initializeApp(TEXA_FIREBASE_CONFIG);
 export const auth: Auth = getAuth(app);
 export const db: Firestore = getFirestore(app);
 export const rtdb: Database = getDatabase(app);
 
-// Log active project (development only)
+// ============================================
+// INITIALIZE FIREBASE - BACKUP (tekno-335f8)
+// ============================================
+const backupApp: FirebaseApp = initializeApp(BACKUP_CONFIG, 'backup');
+export const backupDb: Firestore = getFirestore(backupApp);
+export const backupRtdb: Database = getDatabase(backupApp);
+
+// Log active projects (development only)
 if (import.meta.env.DEV) {
-  console.log('🔥 Firebase Project:', TEXA_FIREBASE_CONFIG.projectId);
+  console.log('🔥 Firebase Primary:', TEXA_FIREBASE_CONFIG.projectId);
+  console.log('🔥 Firebase Backup:', BACKUP_CONFIG.projectId);
 }
 
 // Google Auth Provider
@@ -229,14 +237,24 @@ const saveUserToDatabase = async (firebaseUser: FirebaseUser, additionalData?: P
     );
     await withTimeout(setDoc(userRef, cleanData), 8000);
 
-    // Also save to Realtime Database
+    // Also save to Realtime Database (Primary)
     void withTimeout(set(ref(rtdb, `${RTDB_PATHS.USERS}/${firebaseUser.uid}`), {
-        email: userData.email,
-        name: userData.name,
-        role: userData.role,
-        isActive: userData.isActive,
-        lastLogin: userData.lastLogin
-      }), 8000).catch(() => {});
+      email: userData.email,
+      name: userData.name,
+      role: userData.role,
+      isActive: userData.isActive,
+      lastLogin: userData.lastLogin
+    }), 8000).catch(() => { });
+
+    // Also save to Backup RTDB (tekno-335f8)
+    void withTimeout(set(ref(backupRtdb, `texa_users/${firebaseUser.uid}`), {
+      email: userData.email,
+      name: userData.name,
+      role: userData.role,
+      isActive: userData.isActive,
+      lastLogin: userData.lastLogin,
+      createdAt: userData.createdAt
+    }), 8000).catch(() => { });
   } else {
     // Existing user - update last login
     await withTimeout(setDoc(userRef, {
@@ -247,8 +265,11 @@ const saveUserToDatabase = async (firebaseUser: FirebaseUser, additionalData?: P
       ...(preCreatedDoc?.data?.createdAt ? { createdAt: preCreatedDoc.data.createdAt } : {})
     }, { merge: true }), 8000);
 
-    // Update RTDB
-    void withTimeout(set(ref(rtdb, `${RTDB_PATHS.USERS}/${firebaseUser.uid}/lastLogin`), userData.lastLogin), 8000).catch(() => {});
+    // Update RTDB (Primary)
+    void withTimeout(set(ref(rtdb, `${RTDB_PATHS.USERS}/${firebaseUser.uid}/lastLogin`), userData.lastLogin), 8000).catch(() => { });
+
+    // Update Backup RTDB
+    void withTimeout(set(ref(backupRtdb, `texa_users/${firebaseUser.uid}/lastLogin`), userData.lastLogin), 8000).catch(() => { });
   }
 
   if (preCreatedDoc?.id) {
@@ -267,7 +288,7 @@ export const signInWithGoogle = async (): Promise<TexaUser> => {
   try {
     const result = await signInWithPopup(auth, googleProvider);
     const user = result.user;
-    void saveUserToDatabase(user).catch(() => {});
+    void saveUserToDatabase(user).catch(() => { });
     const existing = await getCurrentUserData(user.uid);
     if (existing) return existing;
     return {
@@ -291,7 +312,7 @@ export const signInWithEmail = async (email: string, password: string): Promise<
   try {
     const result = await signInWithEmailAndPassword(auth, email, password);
     const user = result.user;
-    void saveUserToDatabase(user).catch(() => {});
+    void saveUserToDatabase(user).catch(() => { });
     const existing = await getCurrentUserData(user.uid);
     if (existing) return existing;
     return {
@@ -316,7 +337,7 @@ export const signUpWithEmail = async (email: string, password: string, name: str
     const result = await createUserWithEmailAndPassword(auth, email, password);
     const user = result.user;
     await updateProfile(user, { displayName: name });
-    void saveUserToDatabase(user, { name }).catch(() => {});
+    void saveUserToDatabase(user, { name }).catch(() => { });
     return {
       id: user.uid,
       email: (user.email || '').trim().toLowerCase(),
@@ -423,9 +444,57 @@ export const onAuthChange = (callback: (user: TexaUser | null) => void) => {
 
 // Export config info for debugging
 export const getFirebaseInfo = () => ({
-  projectId: TEXA_FIREBASE_CONFIG.projectId,
-  collections: COLLECTIONS,
-  rtdbPaths: RTDB_PATHS
+  primary: {
+    projectId: TEXA_FIREBASE_CONFIG.projectId,
+    collections: COLLECTIONS,
+    rtdbPaths: RTDB_PATHS
+  },
+  backup: {
+    projectId: BACKUP_CONFIG.projectId,
+    databaseURL: BACKUP_CONFIG.databaseURL
+  }
 });
+
+// ============================================
+// DUAL DATABASE HELPERS
+// ============================================
+
+// Save to backup RTDB
+export const saveToBackupRtdb = async (path: string, data: any): Promise<void> => {
+  try {
+    const dbRef = ref(backupRtdb, path);
+    await set(dbRef, {
+      ...data,
+      updatedAt: new Date().toISOString()
+    });
+    console.log('📦 Saved to backup RTDB:', path);
+  } catch (error) {
+    console.error('Backup RTDB save error:', error);
+    throw error;
+  }
+};
+
+// Update backup RTDB
+export const updateBackupRtdb = async (path: string, data: any): Promise<void> => {
+  try {
+    const dbRef = ref(backupRtdb, path);
+    await update(dbRef, {
+      ...data,
+      updatedAt: new Date().toISOString()
+    });
+  } catch (error) {
+    console.error('Backup RTDB update error:', error);
+    throw error;
+  }
+};
+
+// Sync user to backup
+export const syncUserToBackup = async (user: TexaUser): Promise<void> => {
+  try {
+    await saveToBackupRtdb(`texa_users/${user.id}`, user);
+  } catch (error) {
+    console.warn('Failed to sync user to backup:', error);
+  }
+};
 
 export default app;

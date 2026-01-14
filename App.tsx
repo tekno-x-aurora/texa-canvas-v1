@@ -117,22 +117,32 @@ const App: React.FC = () => {
         // Sync with extension
         const { auth } = await import('./services/firebase');
         const idToken = auth.currentUser ? await auth.currentUser.getIdToken() : null;
-        
+
         // Save to localStorage for extension to read directly
         if (idToken) {
           window.localStorage.setItem('texa_id_token', idToken);
           window.localStorage.setItem('texa_user_email', texaUser.email || '');
           window.localStorage.setItem('texa_user_role', texaUser.role || '');
+          window.localStorage.setItem('texa_user_name', texaUser.name || '');
+          window.localStorage.setItem('texa_subscription_end', texaUser.subscriptionEnd || '');
         }
 
+        // Send complete user profile to extension via postMessage
         window.postMessage({
           source: 'TEXA_DASHBOARD',
           type: 'TEXA_LOGIN_SYNC',
           origin: window.location.origin,
           idToken: idToken,
           user: {
+            id: texaUser.id,
             email: texaUser.email,
-            role: texaUser.role
+            name: texaUser.name,
+            role: texaUser.role,
+            subscriptionEnd: texaUser.subscriptionEnd,
+            isActive: texaUser.isActive,
+            photoURL: texaUser.photoURL,
+            createdAt: texaUser.createdAt,
+            lastLogin: texaUser.lastLogin
           }
         }, window.location.origin);
       }
@@ -150,6 +160,19 @@ const App: React.FC = () => {
     try {
       await logOut();
       setUser(null);
+
+      // Clear localStorage
+      window.localStorage.removeItem('texa_id_token');
+      window.localStorage.removeItem('texa_user_email');
+      window.localStorage.removeItem('texa_user_role');
+      window.localStorage.removeItem('texa_user_name');
+      window.localStorage.removeItem('texa_subscription_end');
+
+      // Notify extension about logout
+      window.postMessage({
+        source: 'TEXA_DASHBOARD',
+        type: 'TEXA_LOGOUT'
+      }, window.location.origin);
     } catch (error) {
       console.error('Logout error:', error);
     }
