@@ -1,0 +1,29 @@
+{
+  "manifest_version": 3,
+  "name": "TEXA Tools Manager",
+  "version": "1.0.0",
+  "description": "Mengelola tools dari dashboard TEXA secara aman dan terintegrasi.",
+  "permissions": ["tabs", "storage", "activeTab"],
+  "host_permissions": [
+    "http://localhost:*/*",
+    "https://*.vercel.app/*",
+    "https://firestore.googleapis.com/*"
+  ],
+  "background": {
+    "service_worker": "background.js"
+  },
+  "content_scripts": [
+    {
+      "matches": [
+        "http://localhost:*/*",
+        "https://*.vercel.app/*"
+      ],
+      "js": ["contentScript.js"],
+      "run_at": "document_end"
+    }
+  ],
+  "action": {
+    "default_popup": "popup.html",
+    "default_title": "TEXA Tools Manager"
+  }
+}

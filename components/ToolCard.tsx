@@ -1,6 +1,7 @@
 
 import React, { useState, useEffect } from 'react';
 import { AITool } from '../types';
+import { auth } from '../services/firebase';
 import {
   subscribeToSettings,
   SubscriptionSettings,
@@ -8,6 +9,7 @@ import {
   formatIDR,
   DEFAULT_SETTINGS
 } from '../services/subscriptionService';
+import '../types/texa-extension';
 
 interface ToolCardProps {
   tool: AITool;
@@ -86,6 +88,51 @@ const ToolCard: React.FC<ToolCardProps> = ({ tool, hasAccess, onBuyClick }) => {
     return () => unsubscribe();
   }, []);
 
+  const tryOpenViaExtension = async (): Promise<boolean> => {
+    if (window.TEXAExtension && window.TEXAExtension.ready) {
+      try {
+        window.TEXAExtension.openTool(tool.id, tool.targetUrl);
+        return true;
+      } catch (error) {
+        console.error('Extension open tool failed:', error);
+        return false;
+      }
+    }
+
+    const requestId = `${Date.now()}-${Math.random().toString(16).slice(2)}`;
+    const idToken = auth.currentUser ? await auth.currentUser.getIdToken() : null;
+
+    return await new Promise<boolean>((resolve) => {
+      const timeoutId = window.setTimeout(() => {
+        window.removeEventListener('message', onAck);
+        resolve(false);
+      }, 800);
+
+      const onAck = (event: MessageEvent) => {
+        if (event.origin !== window.location.origin) return;
+        const data = (event.data || {}) as any;
+        if (data.type !== 'TEXA_OPEN_TOOL_ACK') return;
+        if (data.requestId !== requestId) return;
+
+        window.clearTimeout(timeoutId);
+        window.removeEventListener('message', onAck);
+        resolve(Boolean(data.ok));
+      };
+
+      window.addEventListener('message', onAck);
+      window.postMessage(
+        {
+          type: 'TEXA_OPEN_TOOL',
+          requestId,
+          toolId: tool.id,
+          idToken,
+          targetUrl: tool.targetUrl
+        },
+        window.location.origin
+      );
+    });
+  };
+
   const handleOpenTool = () => {
     if (!hasAccess) {
       setShowSubscribePopup(true);
@@ -97,11 +144,11 @@ const ToolCard: React.FC<ToolCardProps> = ({ tool, hasAccess, onBuyClick }) => {
 
     setTimeout(() => {
       setStatus("Menyiapkan Akses...");
-      setTimeout(() => {
+      setTimeout(async () => {
         setInjecting(false);
         setStatus("Berhasil!");
-        // Open tool in new tab
-        window.open(tool.targetUrl, '_blank');
+        const openedByExtension = await tryOpenViaExtension();
+        if (!openedByExtension) window.open(tool.targetUrl, '_blank');
         setTimeout(() => setStatus(null), 2000);
       }, 1000);
     }, 800);

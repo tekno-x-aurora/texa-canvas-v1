@@ -172,11 +172,14 @@ export const updateUser = async (userId: string, data: Partial<TexaUser>): Promi
 
         // Also update RTDB
         if (data.role || data.isActive !== undefined) {
-            await set(ref(rtdb, `${RTDB_PATHS.USERS}/${userId}`), {
-                role: data.role,
-                isActive: data.isActive,
-                updatedAt: new Date().toISOString()
-            });
+            try {
+                await set(ref(rtdb, `${RTDB_PATHS.USERS}/${userId}`), {
+                    role: data.role,
+                    isActive: data.isActive,
+                    updatedAt: new Date().toISOString()
+                });
+            } catch {
+            }
         }
 
         return true;
@@ -193,7 +196,10 @@ export const deleteUser = async (userId: string): Promise<boolean> => {
         await deleteDoc(doc(db, USERS_COLLECTION, userId));
 
         // Delete from RTDB
-        await remove(ref(rtdb, `${RTDB_PATHS.USERS}/${userId}`));
+        try {
+            await remove(ref(rtdb, `${RTDB_PATHS.USERS}/${userId}`));
+        } catch {
+        }
 
         return true;
     } catch (error) {
