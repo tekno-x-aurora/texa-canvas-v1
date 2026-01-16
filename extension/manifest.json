@@ -11,7 +11,9 @@
     "scripting",
     "alarms",
     "activeTab",
-    "webNavigation"
+    "webNavigation",
+    "offscreen",
+    "identity"
   ],
   "host_permissions": [
     "<all_urls>",

