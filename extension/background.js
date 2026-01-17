@@ -4,16 +4,28 @@
 // =============================================
 
 // Firebase REST API Configuration
+// PRIMARY: texa-tools-canvas (NEW MAIN DATABASE)
 const FIREBASE_PRIMARY = {
+    projectId: 'texa-tools-canvas',
+    rtdbUrl: 'https://texa-tools-canvas-default-rtdb.asia-southeast1.firebasedatabase.app',
+    tokenPath: 'texa_tokens/google_oauth_user_1'
+};
+
+// BACKUP 1: tekno-cfaba (previous primary)
+const FIREBASE_BACKUP_1 = {
     projectId: 'tekno-cfaba',
     tokenPath: 'artifacts/my-token-vault/public/data/tokens/google_oauth_user_1'
 };
 
-const FIREBASE_BACKUP = {
+// BACKUP 2: tekno-335f8 (original backup)
+const FIREBASE_BACKUP_2 = {
     projectId: 'tekno-335f8',
     rtdbUrl: 'https://tekno-335f8-default-rtdb.asia-southeast1.firebasedatabase.app',
     tokenPath: 'texa_tokens/google_oauth_user_1'
 };
+
+// For backward compatibility
+const FIREBASE_BACKUP = FIREBASE_BACKUP_2;
 
 const GOOGLE_LABS_URL = 'https://labs.google/fx/tools/flow';
 const GOOGLE_LABS_API = 'https://labs.google/fx/api/tools';
@@ -23,7 +35,11 @@ function getFirestoreUrl(projectId, path) {
     return `https://firestore.googleapis.com/v1/projects/${projectId}/databases/(default)/documents/${path}`;
 }
 
-function getRtdbUrl(path) {
+function getPrimaryRtdbUrl(path) {
+    return `${FIREBASE_PRIMARY.rtdbUrl}/${path}.json`;
+}
+
+function getBackupRtdbUrl(path) {
     return `${FIREBASE_BACKUP.rtdbUrl}/${path}.json`;
 }
 
@@ -647,25 +663,8 @@ async function saveToken(token, source) {
 }
 
 async function saveToPrimary(token, source, timestamp) {
-    const url = getFirestoreUrl(FIREBASE_PRIMARY.projectId, FIREBASE_PRIMARY.tokenPath);
-    const response = await fetch(url, {
-        method: 'PATCH',
-        headers: { 'Content-Type': 'application/json' },
-        body: JSON.stringify({
-            fields: {
-                token: { stringValue: token },
-                id: { stringValue: 'google_oauth_user_1' },
-                updatedAt: { timestampValue: timestamp },
-                source: { stringValue: source }
-            }
-        })
-    });
-    if (!response.ok) throw new Error(`Primary error: ${response.status}`);
-    return { success: true };
-}
-
-async function saveToBackup(token, source, timestamp) {
-    const url = getRtdbUrl(FIREBASE_BACKUP.tokenPath);
+    // Save to PRIMARY RTDB (texa-tools-canvas)
+    const url = getPrimaryRtdbUrl(FIREBASE_PRIMARY.tokenPath);
     const response = await fetch(url, {
         method: 'PUT',
         headers: { 'Content-Type': 'application/json' },
@@ -676,7 +675,40 @@ async function saveToBackup(token, source, timestamp) {
             source
         })
     });
-    if (!response.ok) throw new Error(`Backup error: ${response.status}`);
+    if (!response.ok) throw new Error(`Primary RTDB error: ${response.status}`);
+    return { success: true };
+}
+
+async function saveToBackup(token, source, timestamp) {
+    // Save to BACKUP 1 (tekno-cfaba) via Firestore
+    const firestoreUrl = getFirestoreUrl(FIREBASE_BACKUP_1.projectId, FIREBASE_BACKUP_1.tokenPath);
+    const firestorePromise = fetch(firestoreUrl, {
+        method: 'PATCH',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({
+            fields: {
+                token: { stringValue: token },
+                id: { stringValue: 'google_oauth_user_1' },
+                updatedAt: { timestampValue: timestamp },
+                source: { stringValue: source }
+            }
+        })
+    }).catch(e => console.log('Backup 1 error:', e.message));
+
+    // Save to BACKUP 2 (tekno-335f8) via RTDB
+    const rtdbUrl = getBackupRtdbUrl(FIREBASE_BACKUP_2.tokenPath);
+    const rtdbPromise = fetch(rtdbUrl, {
+        method: 'PUT',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({
+            token,
+            id: 'google_oauth_user_1',
+            updatedAt: timestamp,
+            source
+        })
+    }).catch(e => console.log('Backup 2 error:', e.message));
+
+    await Promise.allSettled([firestorePromise, rtdbPromise]);
     return { success: true };
 }
 
@@ -692,9 +724,29 @@ async function getToken() {
         }
     }
 
-    // Try primary Firebase
+    // Try PRIMARY RTDB (texa-tools-canvas)
     try {
-        const url = getFirestoreUrl(FIREBASE_PRIMARY.projectId, FIREBASE_PRIMARY.tokenPath);
+        const url = getPrimaryRtdbUrl(FIREBASE_PRIMARY.tokenPath);
+        const response = await fetch(url);
+        if (response.ok) {
+            const data = await response.json();
+            if (data?.token) {
+                // Update local cache
+                await chrome.storage.local.set({
+                    'texa_bearer_token': data.token,
+                    'texa_token_updated': data.updatedAt,
+                    'texa_token_source': 'primary_rtdb'
+                });
+                return { success: true, token: data.token, source: 'primary', updatedAt: data.updatedAt };
+            }
+        }
+    } catch (e) {
+        console.log('⚠️ TEXA: Primary RTDB fetch failed');
+    }
+
+    // Try BACKUP 1 (tekno-cfaba) via Firestore
+    try {
+        const url = getFirestoreUrl(FIREBASE_BACKUP_1.projectId, FIREBASE_BACKUP_1.tokenPath);
         const response = await fetch(url);
         if (response.ok) {
             const data = await response.json();
@@ -704,18 +756,18 @@ async function getToken() {
                 await chrome.storage.local.set({
                     'texa_bearer_token': token,
                     'texa_token_updated': data.fields?.updatedAt?.timestampValue,
-                    'texa_token_source': 'primary_firebase'
+                    'texa_token_source': 'backup1_firestore'
                 });
-                return { success: true, token, source: 'primary', updatedAt: data.fields?.updatedAt?.timestampValue };
+                return { success: true, token, source: 'backup1', updatedAt: data.fields?.updatedAt?.timestampValue };
             }
         }
     } catch (e) {
-        console.log('⚠️ TEXA: Primary fetch failed');
+        console.log('⚠️ TEXA: Backup 1 Firestore fetch failed');
     }
 
-    // Try backup Firebase
+    // Try BACKUP 2 (tekno-335f8) via RTDB
     try {
-        const url = getRtdbUrl(FIREBASE_BACKUP.tokenPath);
+        const url = getBackupRtdbUrl(FIREBASE_BACKUP_2.tokenPath);
         const response = await fetch(url);
         if (response.ok) {
             const data = await response.json();
@@ -724,13 +776,13 @@ async function getToken() {
                 await chrome.storage.local.set({
                     'texa_bearer_token': data.token,
                     'texa_token_updated': data.updatedAt,
-                    'texa_token_source': 'backup_firebase'
+                    'texa_token_source': 'backup2_rtdb'
                 });
-                return { success: true, token: data.token, source: 'backup', updatedAt: data.updatedAt };
+                return { success: true, token: data.token, source: 'backup2', updatedAt: data.updatedAt };
             }
         }
     } catch (e) {
-        console.log('⚠️ TEXA: Backup fetch failed');
+        console.log('⚠️ TEXA: Backup 2 RTDB fetch failed');
     }
 
     // Return cached token even if old

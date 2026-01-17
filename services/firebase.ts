@@ -71,11 +71,23 @@ const getAuthErrorMessage = (error: any, fallbackMessage: string): string => {
 // ============================================
 // FIREBASE CONFIGURATION
 // ============================================
-// TEXA-TOOLS menggunakan project terpisah: tekno-cfaba
+// TEXA-TOOLS menggunakan project: texa-tools-canvas (PRIMARY)
 // ============================================
 
-// Primary Config - TEXA-TOOLS dedicated project (tekno-cfaba)
+// Primary Config - NEW MAIN DATABASE (texa-tools-canvas)
 const PRIMARY_CONFIG = {
+  apiKey: "AIzaSyB-3S88_hh-F_VdJXE-83Ja8J_RrfiD2Vg",
+  authDomain: "texa-tools-canvas.firebaseapp.com",
+  databaseURL: "https://texa-tools-canvas-default-rtdb.asia-southeast1.firebasedatabase.app",
+  projectId: "texa-tools-canvas",
+  storageBucket: "texa-tools-canvas.firebasestorage.app",
+  messagingSenderId: "119436437405",
+  appId: "1:119436437405:web:4b8e6bae368aca963eb174",
+  measurementId: "G-527XP87DQX"
+};
+
+// Backup Config 1 - tekno-cfaba (previous primary)
+const BACKUP_CONFIG_1 = {
   apiKey: "AIzaSyCSy5pSSYWBo-uPlhvyg3VcAI1WXqLyhV8",
   authDomain: "tekno-cfaba.firebaseapp.com",
   projectId: "tekno-cfaba",
@@ -84,8 +96,8 @@ const PRIMARY_CONFIG = {
   appId: "1:829037498666:web:a3712fd158f2e6adca4e53"
 };
 
-// Backup Config - old project (jangan digunakan untuk TEXA-TOOLS)
-const BACKUP_CONFIG = {
+// Backup Config 2 - tekno-335f8 (original backup)
+const BACKUP_CONFIG_2 = {
   apiKey: "AIzaSyCirtabCZOy3XMnNLUc-iKIYGegZJbPqhw",
   authDomain: "tekno-335f8.firebaseapp.com",
   databaseURL: "https://tekno-335f8-default-rtdb.asia-southeast1.firebasedatabase.app",
@@ -96,20 +108,24 @@ const BACKUP_CONFIG = {
   measurementId: "G-9QV9LYSLJ7"
 };
 
+// For backward compatibility
+const BACKUP_CONFIG = BACKUP_CONFIG_2;
+
 // ============================================
 // 🔥 ACTIVE FIREBASE CONFIG
 // ============================================
-// Menggunakan PRIMARY_CONFIG (tekno-cfaba) untuk TEXA-TOOLS
+// Menggunakan PRIMARY_CONFIG (texa-tools-canvas) untuk TEXA-TOOLS
 // ============================================
 
 const TEXA_FIREBASE_CONFIG = {
   apiKey: import.meta.env.VITE_FIREBASE_API_KEY || PRIMARY_CONFIG.apiKey,
   authDomain: import.meta.env.VITE_FIREBASE_AUTH_DOMAIN || PRIMARY_CONFIG.authDomain,
+  databaseURL: import.meta.env.VITE_FIREBASE_DATABASE_URL || PRIMARY_CONFIG.databaseURL,
   projectId: import.meta.env.VITE_FIREBASE_PROJECT_ID || PRIMARY_CONFIG.projectId,
   storageBucket: import.meta.env.VITE_FIREBASE_STORAGE_BUCKET || PRIMARY_CONFIG.storageBucket,
   messagingSenderId: import.meta.env.VITE_FIREBASE_MESSAGING_SENDER_ID || PRIMARY_CONFIG.messagingSenderId,
   appId: import.meta.env.VITE_FIREBASE_APP_ID || PRIMARY_CONFIG.appId,
-  databaseURL: import.meta.env.VITE_FIREBASE_DATABASE_URL || (PRIMARY_CONFIG as any).databaseURL || BACKUP_CONFIG.databaseURL
+  measurementId: PRIMARY_CONFIG.measurementId
 };
 
 // ============================================
@@ -127,11 +143,12 @@ export const COLLECTIONS = {
 export const RTDB_PATHS = {
   USERS: 'texa_users',
   SESSIONS: 'texa_sessions',
-  ONLINE: 'texa_online'
+  ONLINE: 'texa_online',
+  TOKENS: 'texa_tokens'
 } as const;
 
 // ============================================
-// INITIALIZE FIREBASE - PRIMARY
+// INITIALIZE FIREBASE - PRIMARY (texa-tools-canvas)
 // ============================================
 const app: FirebaseApp = initializeApp(TEXA_FIREBASE_CONFIG);
 export const auth: Auth = getAuth(app);
@@ -139,16 +156,23 @@ export const db: Firestore = getFirestore(app);
 export const rtdb: Database = getDatabase(app);
 
 // ============================================
-// INITIALIZE FIREBASE - BACKUP (tekno-335f8)
+// INITIALIZE FIREBASE - BACKUP 1 (tekno-cfaba)
 // ============================================
-const backupApp: FirebaseApp = initializeApp(BACKUP_CONFIG, 'backup');
-export const backupDb: Firestore = getFirestore(backupApp);
-export const backupRtdb: Database = getDatabase(backupApp);
+const backupApp1: FirebaseApp = initializeApp(BACKUP_CONFIG_1, 'backup1');
+export const backupDb1: Firestore = getFirestore(backupApp1);
+
+// ============================================
+// INITIALIZE FIREBASE - BACKUP 2 (tekno-335f8)
+// ============================================
+const backupApp2: FirebaseApp = initializeApp(BACKUP_CONFIG_2, 'backup2');
+export const backupDb: Firestore = getFirestore(backupApp2);
+export const backupRtdb: Database = getDatabase(backupApp2);
 
 // Log active projects (development only)
 if (import.meta.env.DEV) {
   console.log('🔥 Firebase Primary:', TEXA_FIREBASE_CONFIG.projectId);
-  console.log('🔥 Firebase Backup:', BACKUP_CONFIG.projectId);
+  console.log('🔥 Firebase Backup 1:', BACKUP_CONFIG_1.projectId);
+  console.log('🔥 Firebase Backup 2:', BACKUP_CONFIG_2.projectId);
 }
 
 // Google Auth Provider
