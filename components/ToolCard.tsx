@@ -228,15 +228,24 @@ const ToolCard: React.FC<ToolCardProps> = ({ tool, hasAccess, user, onBuyClick }
 
   return (
     <>
-      <div className="glass group rounded-[24px] md:rounded-[32px] overflow-hidden hover:border-indigo-500/40 transition-all duration-500 hover:translate-y-[-5px] flex flex-col h-full relative smooth-animate">
-        <div className="relative h-48 md:h-56 overflow-hidden">
+      <div
+        className="glass group rounded-[12px] md:rounded-[24px] overflow-hidden hover:border-indigo-500/40 transition-all duration-300 hover:translate-y-[-3px] flex flex-col h-full relative"
+        style={{
+          willChange: 'transform',
+          transform: 'translateZ(0)',
+          backfaceVisibility: 'hidden'
+        }}
+      >
+        {/* Image - compact for mobile */}
+        <div className="relative h-20 sm:h-28 md:h-40 lg:h-48 overflow-hidden">
           <img
             src={tool.imageUrl}
             alt={tool.name}
-            className="w-full h-full object-cover group-hover:scale-105 transition-transform duration-700"
+            className="w-full h-full object-cover group-hover:scale-105 transition-transform duration-500"
             loading="lazy"
+            style={{ willChange: 'transform' }}
           />
-          <div className="absolute top-3 left-3 md:top-4 md:left-4 px-3 py-1 bg-black/60 backdrop-blur-xl rounded-full text-[8px] md:text-[10px] font-black uppercase tracking-widest text-indigo-300 border border-white/10">
+          <div className="absolute top-1 left-1 md:top-3 md:left-3 px-1.5 py-0.5 md:px-3 md:py-1 bg-black/60 backdrop-blur-xl rounded-full text-[6px] md:text-[10px] font-black uppercase tracking-widest text-indigo-300 border border-white/10">
             {tool.category}
           </div>
 
@@ -253,10 +262,10 @@ const ToolCard: React.FC<ToolCardProps> = ({ tool, hasAccess, user, onBuyClick }
               <div className="absolute inset-0 bg-black/0 group-hover/play:bg-black/30 transition-all duration-300" />
 
               {/* Play Button - Very Small & Transparent by default, visible on hover */}
-              <div className="relative w-10 h-10 md:w-12 md:h-12 rounded-full bg-black/10 border border-white/10 flex items-center justify-center transition-all duration-300 opacity-40 group-hover/play:opacity-100 group-hover/play:scale-110 group-hover/play:bg-black/50 group-hover/play:border-white/40 group-hover/play:shadow-xl">
+              <div className="relative w-6 h-6 md:w-10 md:h-10 rounded-full bg-black/10 border border-white/10 flex items-center justify-center transition-all duration-300 opacity-40 group-hover/play:opacity-100 group-hover/play:scale-110 group-hover/play:bg-black/50 group-hover/play:border-white/40 group-hover/play:shadow-xl">
                 {/* Play Icon - Subtle */}
                 <svg
-                  className="w-4 h-4 md:w-5 md:h-5 text-white/80 ml-0.5 group-hover/play:text-white transition-all"
+                  className="w-2.5 h-2.5 md:w-4 md:h-4 text-white/80 ml-0.5 group-hover/play:text-white transition-all"
                   fill="currentColor"
                   viewBox="0 0 24 24"
                 >
@@ -265,54 +274,56 @@ const ToolCard: React.FC<ToolCardProps> = ({ tool, hasAccess, user, onBuyClick }
               </div>
 
               {/* Small Video Badge at corner instead of pulse animation */}
-              <div className="absolute bottom-3 right-3 px-2 py-1 bg-black/50 backdrop-blur-sm rounded-md text-[9px] font-bold text-white/70 flex items-center gap-1 opacity-60 group-hover/play:opacity-100 transition-all">
-                <svg className="w-3 h-3" fill="currentColor" viewBox="0 0 24 24">
+              <div className="absolute bottom-1 right-1 md:bottom-3 md:right-3 px-1 py-0.5 md:px-2 md:py-1 bg-black/50 backdrop-blur-sm rounded-md text-[6px] md:text-[9px] font-bold text-white/70 flex items-center gap-0.5 opacity-60 group-hover/play:opacity-100 transition-all">
+                <svg className="w-2 h-2 md:w-3 md:h-3" fill="currentColor" viewBox="0 0 24 24">
                   <path d="M8 5v14l11-7z" />
                 </svg>
-                Video
+                <span className="hidden sm:inline">Video</span>
               </div>
             </button>
           )}
 
           {/* Video Badge - Only show if no play button */}
           {tool.embedVideoUrl && !embedUrl && (
-            <div className="absolute top-3 right-3 md:top-4 md:right-4 px-2 py-1 bg-purple-600/80 backdrop-blur-xl rounded-full text-[8px] font-bold text-white flex items-center gap-1">
-              🎬 Video
+            <div className="absolute top-1 right-1 md:top-3 md:right-3 px-1 py-0.5 md:px-2 md:py-1 bg-purple-600/80 backdrop-blur-xl rounded-full text-[6px] md:text-[8px] font-bold text-white flex items-center gap-0.5">
+              🎬 <span className="hidden sm:inline">Video</span>
             </div>
           )}
         </div>
 
-        <div className="p-5 md:p-7 flex-grow flex flex-col relative">
-          <h3 className="text-xl md:text-2xl font-black mb-2 md:mb-3 group-hover:text-indigo-400 transition-colors tracking-tight">{tool.name}</h3>
-          <p className="text-slate-400 text-xs md:text-sm mb-6 line-clamp-2 font-medium leading-relaxed">
+        {/* Content - compact for mobile */}
+        <div className="p-2 sm:p-3 md:p-5 flex-grow flex flex-col relative">
+          <h3 className="text-[10px] sm:text-xs md:text-lg font-black mb-0.5 md:mb-2 group-hover:text-indigo-400 transition-colors tracking-tight line-clamp-1">{tool.name}</h3>
+          <p className="text-slate-400 text-[8px] md:text-xs mb-2 md:mb-4 line-clamp-1 md:line-clamp-2 font-medium leading-tight hidden sm:block">
             {tool.description}
           </p>
 
-          <div className="mt-auto pt-4 md:pt-6 border-t border-white/5 flex items-center justify-between">
-            <div className="flex flex-col">
-              <span className="text-[8px] md:text-[10px] text-slate-500 uppercase font-black tracking-widest">Mulai</span>
-              <span className="text-sm md:text-lg font-black text-white leading-none">{formatIDR(tool.priceMonthly)}</span>
+          <div className="mt-auto pt-1.5 md:pt-4 border-t border-white/5 flex items-center justify-between gap-1">
+            <div className="flex flex-col min-w-0">
+              <span className="text-[5px] md:text-[10px] text-slate-500 uppercase font-black tracking-widest hidden sm:block">Mulai</span>
+              <span className="text-[8px] sm:text-[10px] md:text-sm font-black text-white leading-none truncate">{formatIDR(tool.priceMonthly)}</span>
             </div>
 
             <button
               disabled={injecting}
               onClick={handleOpenTool}
-              className={`px-4 md:px-6 py-2.5 md:py-3 rounded-xl md:rounded-2xl font-black text-[10px] md:text-sm transition-all flex items-center gap-2 active:scale-95 smooth-animate ${injecting
+              className={`px-1.5 sm:px-2 md:px-4 py-1 sm:py-1.5 md:py-2.5 rounded-md md:rounded-xl font-black text-[7px] sm:text-[8px] md:text-xs transition-all flex items-center gap-0.5 md:gap-2 active:scale-95 flex-shrink-0 ${injecting
                 ? 'bg-amber-500/20 text-amber-400'
                 : hasAccess
                   ? 'bg-gradient-to-r from-emerald-600 to-teal-600 hover:from-emerald-500 hover:to-teal-500 text-white shadow-lg shadow-emerald-900/40'
                   : 'bg-gradient-to-r from-indigo-600 to-purple-600 hover:from-indigo-500 hover:to-purple-500 text-white shadow-xl shadow-indigo-900/40'
                 }`}
+              style={{ willChange: 'transform' }}
             >
               {injecting ? (
                 <>
-                  <div className="w-4 h-4 border-2 border-amber-400 border-t-transparent rounded-full animate-spin"></div>
-                  Proses...
+                  <div className="w-2 h-2 md:w-4 md:h-4 border-2 border-amber-400 border-t-transparent rounded-full animate-spin"></div>
+                  <span className="hidden sm:inline">Proses...</span>
                 </>
               ) : hasAccess ? (
-                <>🚀 Open Tools</>
+                <>🚀 <span className="hidden sm:inline">Open</span></>
               ) : (
-                <>🛒 Beli</>
+                <>🛒 <span className="hidden sm:inline">Beli</span></>
               )}
             </button>
           </div>
@@ -320,13 +331,13 @@ const ToolCard: React.FC<ToolCardProps> = ({ tool, hasAccess, user, onBuyClick }
 
         {status && (
           <div className="absolute inset-0 flex items-center justify-center glass backdrop-blur-2xl z-20 transition-opacity duration-300">
-            <div className="text-center p-6">
-              <div className="w-16 h-16 premium-gradient rounded-2xl mx-auto mb-4 flex items-center justify-center animate-bounce">
-                <svg className="w-8 h-8 text-white" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+            <div className="text-center p-3 md:p-6">
+              <div className="w-8 h-8 md:w-16 md:h-16 premium-gradient rounded-xl md:rounded-2xl mx-auto mb-2 md:mb-4 flex items-center justify-center animate-bounce">
+                <svg className="w-4 h-4 md:w-8 md:h-8 text-white" fill="none" viewBox="0 0 24 24" stroke="currentColor">
                   <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={3} d="M13 10V3L4 14h7v7l9-11h-7z" />
                 </svg>
               </div>
-              <p className="text-white text-lg font-black tracking-tight">{status}</p>
+              <p className="text-white text-xs md:text-lg font-black tracking-tight">{status}</p>
             </div>
           </div>
         )}

@@ -2,7 +2,6 @@ import React from 'react';
 import { Link, useNavigate } from 'react-router-dom';
 import { TexaUser } from '../services/firebase';
 import GradientText from './GradientText';
-import ThemeToggle from './ThemeToggle';
 
 interface NavbarProps {
   user: TexaUser | null;
@@ -42,11 +41,8 @@ const Navbar: React.FC<NavbarProps> = ({ user, onLogout }) => {
           </Link>
         </div>
 
-        {/* Right Section - Theme Toggle, Navigation & User */}
+        {/* Right Section - Navigation & User */}
         <div className="flex items-center gap-3 md:gap-6 ml-auto z-10">
-          {/* Theme Toggle */}
-          <ThemeToggle />
-
           <Link to="/" className="text-xs md:text-sm font-semibold text-gray-300 hover:text-white transition-colors hidden sm:block">Marketplace</Link>
 
           {user ? (

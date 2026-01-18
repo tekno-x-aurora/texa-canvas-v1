@@ -220,8 +220,15 @@ const Marketplace: React.FC<MarketplaceProps> = ({ user }) => {
           }}
         />
 
-        {/* Grid Content */}
-        <div className="relative z-30 grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4 gap-4 md:gap-6">
+        {/* Grid Content - 3x3 on mobile, optimized for 120fps */}
+        <div
+          className="relative z-30 grid grid-cols-3 sm:grid-cols-3 md:grid-cols-4 lg:grid-cols-5 xl:grid-cols-6 gap-2 md:gap-4"
+          style={{
+            willChange: 'transform',
+            transform: 'translateZ(0)',
+            backfaceVisibility: 'hidden'
+          }}
+        >
           {filteredTools.map(tool => {
             // Check if user has active subscription
             const hasActiveSubscription = user?.subscriptionEnd
