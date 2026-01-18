@@ -11,12 +11,6 @@ export interface ChromaItem {
     borderColor?: string;
     gradient?: string;
     url?: string;
-    category?: string;
-    price?: string;
-    hasVideo?: boolean;
-    onAction?: () => void;
-    actionLabel?: string;
-    actionType?: 'primary' | 'success';
 }
 
 export interface ChromaGridProps {
@@ -50,41 +44,60 @@ export const ChromaGrid: React.FC<ChromaGridProps> = ({
 
     const demo: ChromaItem[] = [
         {
-            image: 'https://images.unsplash.com/photo-1677442136019-21780ecad995?auto=format&fit=crop&q=80&w=400',
-            title: 'ChatGPT Plus',
-            subtitle: 'Akses penuh ke GPT-4o, DALL·E 3',
-            category: 'AI Assistant',
+            image: 'https://i.pravatar.cc/300?img=8',
+            title: 'Alex Rivera',
+            subtitle: 'Full Stack Developer',
+            handle: '@alexrivera',
+            borderColor: '#4F46E5',
+            gradient: 'linear-gradient(145deg, #4F46E5, #000)',
+            url: 'https://github.com/'
+        },
+        {
+            image: 'https://i.pravatar.cc/300?img=11',
+            title: 'Jordan Chen',
+            subtitle: 'DevOps Engineer',
+            handle: '@jordanchen',
             borderColor: '#10B981',
-            gradient: 'linear-gradient(145deg, #10B981, #000)',
-            price: 'Rp 45.000',
-            actionLabel: '🛒 Beli',
-            actionType: 'primary'
+            gradient: 'linear-gradient(210deg, #10B981, #000)',
+            url: 'https://linkedin.com/in/'
         },
         {
-            image: 'https://images.unsplash.com/photo-1618005182384-a83a8bd57fbe?auto=format&fit=crop&q=80&w=400',
-            title: 'Midjourney Pro',
-            subtitle: 'Generate gambar AI tanpa batas',
-            category: 'AI Art',
+            image: 'https://i.pravatar.cc/300?img=3',
+            title: 'Morgan Blake',
+            subtitle: 'UI/UX Designer',
+            handle: '@morganblake',
+            borderColor: '#F59E0B',
+            gradient: 'linear-gradient(165deg, #F59E0B, #000)',
+            url: 'https://dribbble.com/'
+        },
+        {
+            image: 'https://i.pravatar.cc/300?img=16',
+            title: 'Casey Park',
+            subtitle: 'Data Scientist',
+            handle: '@caseypark',
+            borderColor: '#EF4444',
+            gradient: 'linear-gradient(195deg, #EF4444, #000)',
+            url: 'https://kaggle.com/'
+        },
+        {
+            image: 'https://i.pravatar.cc/300?img=25',
+            title: 'Sam Kim',
+            subtitle: 'Mobile Developer',
+            handle: '@thesamkim',
             borderColor: '#8B5CF6',
-            gradient: 'linear-gradient(145deg, #8B5CF6, #000)',
-            price: 'Rp 75.000',
-            hasVideo: true,
-            actionLabel: '🛒 Beli',
-            actionType: 'primary'
+            gradient: 'linear-gradient(225deg, #8B5CF6, #000)',
+            url: 'https://github.com/'
         },
         {
-            image: 'https://images.unsplash.com/photo-1626785774573-4b799315345d?auto=format&fit=crop&q=80&w=400',
-            title: 'Canva Pro',
-            subtitle: 'Jutaan aset premium & tools',
-            category: 'Design',
+            image: 'https://i.pravatar.cc/300?img=60',
+            title: 'Tyler Rodriguez',
+            subtitle: 'Cloud Architect',
+            handle: '@tylerrod',
             borderColor: '#06B6D4',
-            gradient: 'linear-gradient(145deg, #06B6D4, #000)',
-            price: 'Rp 15.000',
-            actionLabel: '🚀 Open',
-            actionType: 'success'
+            gradient: 'linear-gradient(135deg, #06B6D4, #000)',
+            url: 'https://aws.amazon.com/'
         }
     ];
-
     const data = items?.length ? items : demo;
 
     useEffect(() => {
@@ -126,11 +139,9 @@ export const ChromaGrid: React.FC<ChromaGridProps> = ({
         });
     };
 
-    const handleCardClick = (item: ChromaItem) => {
-        if (item.onAction) {
-            item.onAction();
-        } else if (item.url) {
-            window.open(item.url, '_blank', 'noopener,noreferrer');
+    const handleCardClick = (url?: string) => {
+        if (url) {
+            window.open(url, '_blank', 'noopener,noreferrer');
         }
     };
 
@@ -162,66 +173,23 @@ export const ChromaGrid: React.FC<ChromaGridProps> = ({
                     key={i}
                     className="chroma-card"
                     onMouseMove={handleCardMove}
+                    onClick={() => handleCardClick(c.url)}
                     style={
                         {
                             '--card-border': c.borderColor || 'transparent',
-                            '--card-gradient': c.gradient
+                            '--card-gradient': c.gradient,
+                            cursor: c.url ? 'pointer' : 'default'
                         } as React.CSSProperties
                     }
                 >
                     <div className="chroma-img-wrapper">
                         <img src={c.image} alt={c.title} loading="lazy" />
-
-                        {/* Category Badge */}
-                        {c.category && (
-                            <span className="category-badge">{c.category}</span>
-                        )}
-
-                        {/* Price Tag */}
-                        {c.price && (
-                            <span className="price-tag">{c.price}</span>
-                        )}
-
-                        {/* Video Badge */}
-                        {c.hasVideo && (
-                            <span className="video-badge">
-                                <svg width="12" height="12" viewBox="0 0 24 24" fill="currentColor">
-                                    <path d="M8 5v14l11-7z" />
-                                </svg>
-                                Video
-                            </span>
-                        )}
-
-                        {/* Play Overlay */}
-                        {c.hasVideo && (
-                            <div className="play-overlay">
-                                <button className="play-btn">
-                                    <svg viewBox="0 0 24 24">
-                                        <path d="M8 5v14l11-7z" />
-                                    </svg>
-                                </button>
-                            </div>
-                        )}
                     </div>
-
                     <footer className="chroma-info">
                         <h3 className="name">{c.title}</h3>
                         {c.handle && <span className="handle">{c.handle}</span>}
                         <p className="role">{c.subtitle}</p>
                         {c.location && <span className="location">{c.location}</span>}
-
-                        {/* Action Button */}
-                        {c.actionLabel && (
-                            <button
-                                className={`action-btn ${c.actionType || 'primary'}`}
-                                onClick={(e) => {
-                                    e.stopPropagation();
-                                    handleCardClick(c);
-                                }}
-                            >
-                                {c.actionLabel}
-                            </button>
-                        )}
                     </footer>
                 </article>
             ))}
