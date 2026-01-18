@@ -2,6 +2,7 @@
 import React from 'react';
 import { Link, useNavigate } from 'react-router-dom';
 import { TexaUser } from '../services/firebase';
+import GradientText from './GradientText';
 
 interface NavbarProps {
   user: TexaUser | null;
@@ -18,13 +19,19 @@ const Navbar: React.FC<NavbarProps> = ({ user, onLogout }) => {
           <div className="w-10 h-10 md:w-12 md:h-12 rounded-full overflow-hidden border-2 border-indigo-500/50 shadow-[0_0_20px_rgba(79,70,229,0.5)] group-hover:scale-110 transition-all duration-300 flex items-center justify-center bg-black">
             <img
               src="https://media0.giphy.com/media/v1.Y2lkPTc5MGI3NjExaG9teHpqbDg1d2w1cXlldWltOGd4eXp1bGRmenJtMHp4M2F1amV1MyZlcD12MV9pbnRlcm5hbF9naWZfYnlfaWQmY3Q9Zw/dXlUFmuOWFRlHYgc9i/giphy.gif"
-              alt="TEXA-TOOLS Logo"
+              alt="TEXA Logo"
               className="w-full h-full object-cover"
               loading="eager"
             />
           </div>
           <div className="flex flex-col leading-none">
-            <span className="text-lg md:text-xl font-black tracking-tighter text-white">TEXA<span className="text-indigo-400">TOOLS</span></span>
+            <GradientText
+              colors={["#6366f1", "#8b5cf6", "#06b6d4", "#10b981", "#6366f1"]}
+              animationSpeed={3}
+              className="text-xl md:text-2xl font-black tracking-tighter"
+            >
+              TEXA
+            </GradientText>
             <span className="text-[8px] md:text-[10px] text-gray-500 font-bold uppercase tracking-widest hidden xs:block">AI Marketplace</span>
           </div>
         </Link>
