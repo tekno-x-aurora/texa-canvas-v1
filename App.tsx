@@ -7,7 +7,6 @@ import AdminDashboard from './components/AdminDashboard';
 import UserProfile from './components/UserProfile';
 import Login from './components/Login';
 import Hero from './components/Hero';
-import SplashCursor from './components/SplashCursor';
 import ToolIframePage from './components/ToolIframePage';
 import { onAuthChange, logOut, TexaUser } from './services/firebase';
 import { PopupProvider, usePopup } from './services/popupContext';
@@ -34,13 +33,12 @@ const AppContent: React.FC<{
 
   return (
     <div className="min-h-screen flex flex-col relative">
-      <SplashCursor />
 
       {/* Conditionally render Navbar - hidden on admin/login pages and when popup is open */}
       <div
         className={`transition-all duration-300 ease-in-out ${shouldHideNavigation
-            ? 'opacity-0 pointer-events-none h-0 overflow-hidden'
-            : 'opacity-100'
+          ? 'opacity-0 pointer-events-none h-0 overflow-hidden'
+          : 'opacity-100'
           }`}
       >
         {!hideHeaderFooter && <Navbar user={user} onLogout={onLogout} />}
@@ -97,8 +95,8 @@ const AppContent: React.FC<{
       {/* Conditionally render Footer - hidden on admin/login pages and when popup is open */}
       <div
         className={`transition-all duration-300 ease-in-out ${shouldHideNavigation
-            ? 'opacity-0 pointer-events-none h-0 overflow-hidden'
-            : 'opacity-100'
+          ? 'opacity-0 pointer-events-none h-0 overflow-hidden'
+          : 'opacity-100'
           }`}
       >
         {!hideHeaderFooter && (
