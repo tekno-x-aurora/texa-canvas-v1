@@ -9,6 +9,7 @@ import Login from './components/Login';
 import Hero from './components/Hero';
 import ToolIframePage from './components/ToolIframePage';
 import Aurora from './components/Aurora';
+import ThemeToggle from './components/ThemeToggle';
 import { onAuthChange, logOut, TexaUser } from './services/firebase';
 import { PopupProvider, usePopup } from './services/popupContext';
 import { ThemeProvider, useTheme, AURORA_COLORS } from './services/themeContext';
@@ -50,6 +51,9 @@ const AppContent: React.FC<{
     <div className="min-h-screen flex flex-col relative">
       {/* Aurora Background */}
       <AuroraBackground />
+
+      {/* Global Theme Toggle - Fixed at top right */}
+      <ThemeToggle />
 
       {/* Conditionally render Navbar - hidden on admin/login pages and when popup is open */}
       <div

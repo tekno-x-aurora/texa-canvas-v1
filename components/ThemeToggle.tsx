@@ -8,36 +8,22 @@ export default function ThemeToggle() {
     return (
         <button
             onClick={toggleTheme}
-            className={`
-        fixed top-3 right-3 z-[200]
-        w-9 h-9 md:w-10 md:h-10
-        rounded-full
-        flex items-center justify-center
-        transition-all duration-300
-        shadow-lg
-        backdrop-blur-md
-        border border-white/20
-        focus:outline-none
-        active:scale-95
-        ${isDark
-                    ? 'bg-slate-900/80 hover:bg-slate-800/90'
-                    : 'bg-white/80 hover:bg-white/95'
-                }
-      `}
+            className={`fixed top-3 right-3 md:top-4 md:right-4 z-[200] w-9 h-9 md:w-10 md:h-10 rounded-full shadow-lg flex items-center justify-center transition-all duration-300 backdrop-blur-xl border ${isDark
+                    ? 'bg-slate-900/80 border-white/10 hover:bg-slate-800/90'
+                    : 'bg-white/80 border-black/10 hover:bg-white/95'
+                }`}
             aria-label={`Switch to ${isDark ? 'light' : 'dark'} theme`}
-            style={{ willChange: 'transform' }}
         >
             <motion.div
+                initial={false}
                 animate={{
                     rotate: isDark ? 0 : 180,
-                    scale: isDark ? 1 : 1.1
+                    scale: [1, 1.2, 1]
                 }}
                 transition={{
-                    type: 'spring',
-                    stiffness: 400,
-                    damping: 20
+                    duration: 0.5,
+                    ease: 'easeInOut'
                 }}
-                style={{ willChange: 'transform' }}
             >
                 {isDark ? (
                     // Moon icon
