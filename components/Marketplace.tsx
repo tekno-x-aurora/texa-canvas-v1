@@ -209,28 +209,18 @@ const Marketplace: React.FC<MarketplaceProps> = ({ user }) => {
             />
           );
         })}
+
+        {/* Spotlight and Fade overlays are now at the end */}
       </div>
 
-      {/* Bottom Gradient Accent */}
-      <div
-        className="absolute bottom-0 left-0 right-0 h-1 pointer-events-none"
-        style={{
-          background: 'linear-gradient(90deg, #6366f1, #8b5cf6, #06b6d4, #6366f1)',
-          backgroundSize: '200% 100%',
-          animation: 'shimmer 3s linear infinite',
-          borderRadius: '0 0 24px 24px'
-        }}
-      />
-    </div>
-
-      {/* Shimmer Animation */ }
-  <style>{`
+      {/* Shimmer Animation */}
+      <style>{`
         @keyframes shimmer {
           0% { background-position: 200% 0; }
           100% { background-position: -200% 0; }
         }
       `}</style>
-    </section >
+    </section>
   );
 };
 
