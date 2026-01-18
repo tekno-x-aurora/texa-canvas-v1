@@ -138,6 +138,7 @@ const Marketplace: React.FC<MarketplaceProps> = ({ user }) => {
               key={tool.id}
               tool={tool}
               hasAccess={hasActiveSubscription}
+              user={user}
             />
           );
         })}

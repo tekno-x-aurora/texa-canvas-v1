@@ -18,6 +18,7 @@ import ExtensionWarningPopup from './ExtensionWarningPopup';
 interface ToolCardProps {
   tool: AITool;
   hasAccess: boolean;
+  user?: { id: string; email: string } | null;  // Add user prop to check login status
   onBuyClick?: () => void;
 }
 
@@ -70,7 +71,7 @@ const parseYouTubeUrl = (url: string): string | null => {
   }
 };
 
-const ToolCard: React.FC<ToolCardProps> = ({ tool, hasAccess, onBuyClick }) => {
+const ToolCard: React.FC<ToolCardProps> = ({ tool, hasAccess, user, onBuyClick }) => {
   const navigate = useNavigate();
   const [injecting, setInjecting] = useState(false);
   const [status, setStatus] = useState<string | null>(null);
@@ -148,6 +149,13 @@ const ToolCard: React.FC<ToolCardProps> = ({ tool, hasAccess, onBuyClick }) => {
 
   const handleOpenTool = async () => {
     if (!hasAccess) {
+      // Check if user is logged in first
+      if (!user) {
+        // User not logged in - redirect to login page
+        navigate('/login');
+        return;
+      }
+      // User is logged in but no subscription - show subscription popup
       setShowSubscribePopup(true);
       return;
     }
