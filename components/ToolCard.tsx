@@ -228,15 +228,15 @@ const ToolCard: React.FC<ToolCardProps> = ({ tool, hasAccess, user, onBuyClick }
 
   return (
     <>
-      <div className="glass group rounded-[24px] md:rounded-[32px] overflow-hidden hover:border-indigo-500/40 transition-all duration-500 hover:translate-y-[-5px] flex flex-col h-full relative smooth-animate">
-        <div className="relative h-48 md:h-56 overflow-hidden">
+      <div className="glass group rounded-[12px] md:rounded-[32px] overflow-hidden hover:border-indigo-500/40 transition-all duration-500 hover:translate-y-[-5px] flex flex-col h-full relative smooth-animate">
+        <div className="relative h-24 md:h-56 overflow-hidden">
           <img
             src={tool.imageUrl}
             alt={tool.name}
             className="w-full h-full object-cover group-hover:scale-105 transition-transform duration-700"
             loading="lazy"
           />
-          <div className="absolute top-3 left-3 md:top-4 md:left-4 px-3 py-1 bg-black/60 backdrop-blur-xl rounded-full text-[8px] md:text-[10px] font-black uppercase tracking-widest text-indigo-300 border border-white/10">
+          <div className="absolute top-1 left-1 md:top-4 md:left-4 px-1.5 md:px-3 py-0.5 md:py-1 bg-black/60 backdrop-blur-xl rounded-full text-[6px] md:text-[10px] font-black uppercase tracking-widest text-indigo-300 border border-white/10">
             {tool.category}
           </div>
 
@@ -282,22 +282,22 @@ const ToolCard: React.FC<ToolCardProps> = ({ tool, hasAccess, user, onBuyClick }
           )}
         </div>
 
-        <div className="p-5 md:p-7 flex-grow flex flex-col relative">
-          <h3 className="text-xl md:text-2xl font-black mb-2 md:mb-3 group-hover:text-indigo-400 transition-colors tracking-tight">{tool.name}</h3>
-          <p className="text-slate-400 text-xs md:text-sm mb-6 line-clamp-2 font-medium leading-relaxed">
+        <div className="p-2 md:p-7 flex-grow flex flex-col relative">
+          <h3 className="text-[10px] md:text-2xl font-black mb-1 md:mb-3 group-hover:text-indigo-400 transition-colors tracking-tight line-clamp-1">{tool.name}</h3>
+          <p className="text-slate-400 text-[8px] md:text-sm mb-2 md:mb-6 line-clamp-2 font-medium leading-relaxed hidden md:block">
             {tool.description}
           </p>
 
-          <div className="mt-auto pt-4 md:pt-6 border-t border-white/5 flex items-center justify-between">
+          <div className="mt-auto pt-1 md:pt-6 border-t border-white/5 flex flex-col md:flex-row items-start md:items-center justify-between gap-1 md:gap-0">
             <div className="flex flex-col">
-              <span className="text-[8px] md:text-[10px] text-slate-500 uppercase font-black tracking-widest">Mulai</span>
-              <span className="text-sm md:text-lg font-black text-white leading-none">{formatIDR(tool.priceMonthly)}</span>
+              <span className="text-[6px] md:text-[10px] text-slate-500 uppercase font-black tracking-widest hidden md:block">Mulai</span>
+              <span className="text-[8px] md:text-lg font-black text-white leading-none">{formatIDR(tool.priceMonthly)}</span>
             </div>
 
             <button
               disabled={injecting}
               onClick={handleOpenTool}
-              className={`px-4 md:px-6 py-2.5 md:py-3 rounded-xl md:rounded-2xl font-black text-[10px] md:text-sm transition-all flex items-center gap-2 active:scale-95 smooth-animate ${injecting
+              className={`w-full md:w-auto px-2 md:px-6 py-1.5 md:py-3 rounded-lg md:rounded-2xl font-black text-[7px] md:text-sm transition-all flex items-center justify-center gap-1 md:gap-2 active:scale-95 smooth-animate ${injecting
                 ? 'bg-amber-500/20 text-amber-400'
                 : hasAccess
                   ? 'bg-gradient-to-r from-emerald-600 to-teal-600 hover:from-emerald-500 hover:to-teal-500 text-white shadow-lg shadow-emerald-900/40'
@@ -306,13 +306,13 @@ const ToolCard: React.FC<ToolCardProps> = ({ tool, hasAccess, user, onBuyClick }
             >
               {injecting ? (
                 <>
-                  <div className="w-4 h-4 border-2 border-amber-400 border-t-transparent rounded-full animate-spin"></div>
-                  Proses...
+                  <div className="w-3 h-3 md:w-4 md:h-4 border-2 border-amber-400 border-t-transparent rounded-full animate-spin"></div>
+                  <span className="hidden md:inline">Proses...</span>
                 </>
               ) : hasAccess ? (
-                <>🚀 Open Tools</>
+                <>🚀 <span className="hidden md:inline">Open</span></>
               ) : (
-                <>🛒 Beli</>
+                <>🛒 <span className="hidden md:inline">Beli</span></>
               )}
             </button>
           </div>
