@@ -126,7 +126,7 @@ const Marketplace: React.FC<MarketplaceProps> = ({ user }) => {
         </div>
       </div>
 
-      <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4 gap-4 md:gap-6 px-2">
+      <div className="grid grid-cols-3 sm:grid-cols-3 lg:grid-cols-4 xl:grid-cols-5 gap-2 md:gap-4 px-1 md:px-2">
         {filteredTools.map(tool => {
           // Check if user has active subscription
           const hasActiveSubscription = user?.subscriptionEnd
