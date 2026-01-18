@@ -12,7 +12,7 @@ document.addEventListener('DOMContentLoaded', function () {
             // Use getDashboardUrl if available, otherwise use default
             const dashboardUrl = (typeof getDashboardUrl === 'function')
                 ? getDashboardUrl()
-                : 'http://localhost:3000';
+                : 'https://www.texa.web.id';
 
             chrome.tabs.create({ url: dashboardUrl + '/#/' });
         });

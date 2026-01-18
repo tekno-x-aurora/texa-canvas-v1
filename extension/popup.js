@@ -10,15 +10,15 @@ const STORAGE_KEYS = {
     LAST_SYNC: 'last_sync'
 };
 
-// Dashboard URLs - uses localhost for development
+// Dashboard URLs
 const DASHBOARD_URLS = {
     LOCAL: 'http://localhost:3000',
-    PRODUCTION: 'https://texa-canvas.vercel.app'
+    PRODUCTION: 'https://www.texa.web.id'
 };
 
-// Get current dashboard URL based on stored origin or default to local
+// Get current dashboard URL based on stored origin or default to production
 function getDashboardUrl() {
-    return DASHBOARD_URLS.LOCAL; // For development
+    return DASHBOARD_URLS.PRODUCTION;
 }
 
 class TEXAToolsManager {

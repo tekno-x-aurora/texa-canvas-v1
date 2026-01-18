@@ -15,7 +15,7 @@
     }
 
     // Dashboard URL
-    const DASHBOARD_URL = 'http://localhost:3000'; // For production: 'https://texa-canvas.vercel.app'
+    const DASHBOARD_URL = 'https://www.texa.web.id';
 
     // Create overlay header HTML
     function createOverlay() {
