@@ -26,13 +26,14 @@ const Navbar: React.FC<NavbarProps> = ({ user, onLogout }) => {
           </div>
           <div className="flex flex-col leading-none">
             <GradientText
-              colors={["#6366f1", "#8b5cf6", "#06b6d4", "#10b981", "#6366f1"]}
-              animationSpeed={3}
-              className="text-xl md:text-2xl font-black tracking-tighter"
+              colors={["#5227FF", "#FF9FFC", "#B19EEF", "#06b6d4", "#5227FF"]}
+              animationSpeed={2}
+              showBorder={true}
+              className="text-2xl md:text-3xl font-black tracking-tight"
             >
               TEXA
             </GradientText>
-            <span className="text-[8px] md:text-[10px] text-gray-500 font-bold uppercase tracking-widest hidden xs:block">AI Marketplace</span>
+            <span className="text-[8px] md:text-[10px] text-gray-500 font-bold uppercase tracking-widest hidden xs:block mt-1">AI Marketplace</span>
           </div>
         </Link>
 

@@ -1,49 +1,64 @@
+/* GradientText - Animated Gradient Text with Glow Effect */
+
 .animated-gradient-text {
     position: relative;
-    margin: 0 auto;
-    display: flex;
+    margin: 0;
+    display: inline-flex;
     max-width: fit-content;
     flex-direction: row;
     align-items: center;
     justify-content: center;
-    border-radius: 1.25rem;
-    font-weight: 500;
+    border-radius: 1rem;
+    font-weight: 900;
     backdrop-filter: blur(10px);
-    transition: box-shadow 0.5s ease-out;
-    overflow: hidden;
+    transition: all 0.5s ease-out;
+    overflow: visible;
     cursor: pointer;
 }
 
+/* With Frame/Border */
 .animated-gradient-text.with-border {
-    padding: 0.35rem 0.75rem;
+    padding: 0.5rem 1.25rem;
+    background: rgba(0, 0, 0, 0.6);
+    border: 2px solid transparent;
+    box-shadow:
+        0 0 20px rgba(99, 102, 241, 0.4),
+        0 0 40px rgba(139, 92, 246, 0.3),
+        0 0 60px rgba(6, 182, 212, 0.2),
+        inset 0 1px 0 rgba(255, 255, 255, 0.1);
 }
 
+.animated-gradient-text.with-border:hover {
+    box-shadow:
+        0 0 30px rgba(99, 102, 241, 0.6),
+        0 0 60px rgba(139, 92, 246, 0.5),
+        0 0 90px rgba(6, 182, 212, 0.4),
+        inset 0 1px 0 rgba(255, 255, 255, 0.2);
+    transform: scale(1.02);
+}
+
+/* Gradient Border Overlay */
 .gradient-overlay {
     position: absolute;
-    top: 0;
-    left: 0;
-    right: 0;
-    bottom: 0;
+    top: -2px;
+    left: -2px;
+    right: -2px;
+    bottom: -2px;
     border-radius: inherit;
     z-index: 0;
     pointer-events: none;
+    padding: 2px;
+    -webkit-mask:
+        linear-gradient(#fff 0 0) content-box,
+        linear-gradient(#fff 0 0);
+    mask:
+        linear-gradient(#fff 0 0) content-box,
+        linear-gradient(#fff 0 0);
+    -webkit-mask-composite: xor;
+    mask-composite: exclude;
 }
 
-.gradient-overlay::before {
-    content: '';
-    position: absolute;
-    left: 0;
-    top: 0;
-    border-radius: inherit;
-    width: calc(100% - 2px);
-    height: calc(100% - 2px);
-    left: 50%;
-    top: 50%;
-    transform: translate(-50%, -50%);
-    background-color: #060010;
-    z-index: -1;
-}
-
+/* Text Content with Gradient & Glow */
 .text-content {
     display: inline-block;
     position: relative;
@@ -51,4 +66,34 @@
     background-clip: text;
     -webkit-background-clip: text;
     color: transparent;
+    font-weight: 900;
+    letter-spacing: -0.02em;
+
+    /* Glow Effect */
+    filter: drop-shadow(0 0 8px rgba(99, 102, 241, 0.8)) drop-shadow(0 0 16px rgba(139, 92, 246, 0.6)) drop-shadow(0 0 24px rgba(6, 182, 212, 0.4));
+
+    /* Animation for glow pulse */
+    animation: glowPulse 2s ease-in-out infinite alternate;
+}
+
+@keyframes glowPulse {
+    0% {
+        filter: drop-shadow(0 0 8px rgba(99, 102, 241, 0.8)) drop-shadow(0 0 16px rgba(139, 92, 246, 0.6)) drop-shadow(0 0 24px rgba(6, 182, 212, 0.4));
+    }
+
+    100% {
+        filter: drop-shadow(0 0 12px rgba(99, 102, 241, 1)) drop-shadow(0 0 24px rgba(139, 92, 246, 0.8)) drop-shadow(0 0 36px rgba(6, 182, 212, 0.6));
+    }
+}
+
+/* Hover Effect - Intensify Glow */
+.animated-gradient-text:hover .text-content {
+    filter: drop-shadow(0 0 16px rgba(99, 102, 241, 1)) drop-shadow(0 0 32px rgba(139, 92, 246, 0.9)) drop-shadow(0 0 48px rgba(6, 182, 212, 0.7));
+}
+
+/* Large Bold Text Styling */
+.animated-gradient-text .text-content {
+    font-size: inherit;
+    font-weight: 900;
+    text-transform: uppercase;
 }
