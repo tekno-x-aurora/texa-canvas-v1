@@ -176,89 +176,61 @@ const Marketplace: React.FC<MarketplaceProps> = ({ user }) => {
         </div>
       </div>
 
-      {/* Glass Frame Container with Spotlight Effect */}
+      {/* ChromaGrid Container with Spotlight Effect */}
       <div
         ref={gridRef}
-        className="relative rounded-[24px] md:rounded-[32px] p-4 md:p-6 overflow-hidden"
+        className="chroma-grid"
         style={{
-          '--spotlight-x': '50%',
-          '--spotlight-y': '50%',
-          background: 'rgba(255, 255, 255, 0.05)',
-          backdropFilter: 'blur(20px) saturate(180%)',
-          WebkitBackdropFilter: 'blur(20px) saturate(180%)',
-          border: '1px solid rgba(255, 255, 255, 0.1)',
-          boxShadow: '0 25px 50px -12px rgba(0, 0, 0, 0.4), inset 0 1px 0 0 rgba(255, 255, 255, 0.1)'
+          '--x': '50%',
+          '--y': '50%',
+          '--r': '400px',
+          '--cols': 3
         } as React.CSSProperties}
         onPointerMove={handleMove}
         onPointerLeave={handleLeave}
       >
         {/* Spotlight Overlay */}
-        <div
-          className="absolute inset-0 pointer-events-none z-10 rounded-[24px] md:rounded-[32px]"
-          style={{
-            background: 'radial-gradient(circle 400px at var(--spotlight-x) var(--spotlight-y), transparent 0%, rgba(0, 0, 0, 0.4) 100%)',
-            mixBlendMode: 'multiply'
-          }}
-        />
+        <div className="chroma-overlay" />
 
         {/* Fade Overlay */}
-        <div
-          ref={fadeRef}
-          className="absolute inset-0 pointer-events-none z-20 rounded-[24px] md:rounded-[32px]"
-          style={{
-            background: 'rgba(0, 0, 0, 0.2)',
-            opacity: 1
-          }}
-        />
+        <div ref={fadeRef} className="chroma-fade" />
+        {filteredTools.map(tool => {
+          // Check if user has active subscription
+          const hasActiveSubscription = user?.subscriptionEnd
+            ? new Date(user.subscriptionEnd) > new Date()
+            : false;
 
-        {/* Decorative Border Glow */}
-        <div
-          className="absolute inset-0 pointer-events-none rounded-[24px] md:rounded-[32px]"
-          style={{
-            background: 'linear-gradient(135deg, rgba(99, 102, 241, 0.15), rgba(139, 92, 246, 0.1), rgba(6, 182, 212, 0.1))',
-            opacity: 0.5
-          }}
-        />
-
-        {/* Grid Content - 3 columns on mobile */}
-        <div className="relative z-30 grid grid-cols-3 sm:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4 gap-2 md:gap-6">
-          {filteredTools.map(tool => {
-            // Check if user has active subscription
-            const hasActiveSubscription = user?.subscriptionEnd
-              ? new Date(user.subscriptionEnd) > new Date()
-              : false;
-
-            return (
-              <ToolCard
-                key={tool.id}
-                tool={tool}
-                hasAccess={hasActiveSubscription}
-                user={user}
-              />
-            );
-          })}
-        </div>
-
-        {/* Bottom Gradient Accent */}
-        <div
-          className="absolute bottom-0 left-0 right-0 h-1 pointer-events-none"
-          style={{
-            background: 'linear-gradient(90deg, #6366f1, #8b5cf6, #06b6d4, #6366f1)',
-            backgroundSize: '200% 100%',
-            animation: 'shimmer 3s linear infinite',
-            borderRadius: '0 0 24px 24px'
-          }}
-        />
+          return (
+            <ToolCard
+              key={tool.id}
+              tool={tool}
+              hasAccess={hasActiveSubscription}
+              user={user}
+            />
+          );
+        })}
       </div>
 
-      {/* Shimmer Animation */}
-      <style>{`
+      {/* Bottom Gradient Accent */}
+      <div
+        className="absolute bottom-0 left-0 right-0 h-1 pointer-events-none"
+        style={{
+          background: 'linear-gradient(90deg, #6366f1, #8b5cf6, #06b6d4, #6366f1)',
+          backgroundSize: '200% 100%',
+          animation: 'shimmer 3s linear infinite',
+          borderRadius: '0 0 24px 24px'
+        }}
+      />
+    </div>
+
+      {/* Shimmer Animation */ }
+  <style>{`
         @keyframes shimmer {
           0% { background-position: 200% 0; }
           100% { background-position: -200% 0; }
         }
       `}</style>
-    </section>
+    </section >
   );
 };
 
