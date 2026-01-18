@@ -14,8 +14,9 @@ const Navbar: React.FC<NavbarProps> = ({ user, onLogout }) => {
 
   return (
     <nav className="sticky top-0 z-[100] glass border-b border-white/10 px-4 md:px-6 py-3 md:py-4 smooth-animate">
-      <div className="container mx-auto flex justify-between items-center max-w-7xl">
-        <Link to="/" className="flex items-center gap-2 md:gap-3 group">
+      <div className="container mx-auto flex items-center max-w-7xl relative">
+        {/* Left Section - Logo only */}
+        <Link to="/" className="flex items-center group z-10">
           <div className="w-10 h-10 md:w-12 md:h-12 rounded-full overflow-hidden border-2 border-indigo-500/50 shadow-[0_0_20px_rgba(79,70,229,0.5)] group-hover:scale-110 transition-all duration-300 flex items-center justify-center bg-black">
             <img
               src="https://media0.giphy.com/media/v1.Y2lkPTc5MGI3NjExaG9teHpqbDg1d2w1cXlldWltOGd4eXp1bGRmenJtMHp4M2F1amV1MyZlcD12MV9pbnRlcm5hbF9naWZfYnlfaWQmY3Q9Zw/dXlUFmuOWFRlHYgc9i/giphy.gif"
@@ -24,20 +25,25 @@ const Navbar: React.FC<NavbarProps> = ({ user, onLogout }) => {
               loading="eager"
             />
           </div>
-          <div className="flex flex-col leading-none">
+        </Link>
+
+        {/* Center Section - TEXA Branding */}
+        <div className="absolute left-1/2 -translate-x-1/2 flex flex-col items-center">
+          <Link to="/" className="flex flex-col items-center">
             <GradientText
-              colors={["#5227FF", "#FF9FFC", "#B19EEF", "#06b6d4", "#5227FF"]}
-              animationSpeed={2}
+              colors={["#5227FF", "#FF9FFC", "#B19EEF", "#ff0000", "#5227FF"]}
+              animationSpeed={1}
               showBorder={true}
-              className="text-2xl md:text-3xl font-black tracking-tight"
+              className="text-2xl md:text-4xl font-black tracking-tight"
             >
               TEXA
             </GradientText>
-            <span className="text-[8px] md:text-[10px] text-gray-500 font-bold uppercase tracking-widest hidden xs:block mt-1">AI Marketplace</span>
-          </div>
-        </Link>
+            <span className="text-[8px] md:text-[10px] text-gray-500 font-bold uppercase tracking-widest mt-1">AI Marketplace</span>
+          </Link>
+        </div>
 
-        <div className="flex items-center gap-3 md:gap-8">
+        {/* Right Section - Navigation & User */}
+        <div className="flex items-center gap-3 md:gap-8 ml-auto z-10">
           <Link to="/" className="text-xs md:text-sm font-semibold text-gray-300 hover:text-white transition-colors hidden sm:block">Marketplace</Link>
 
           {user ? (
