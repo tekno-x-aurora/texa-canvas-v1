@@ -1,7 +1,7 @@
 
 import React, { useState, useEffect } from 'react';
 import { AITool } from '../types';
-import { auth } from '../services/firebase';
+import { auth, TexaUser } from '../services/firebase';
 import { useNavigate } from 'react-router-dom';
 import { isUrlIframeAllowed } from '../utils/iframePolicy';
 import {
@@ -18,7 +18,7 @@ import ExtensionWarningPopup from './ExtensionWarningPopup';
 interface ToolCardProps {
   tool: AITool;
   hasAccess: boolean;
-  user?: { id: string; email: string } | null;  // Add user prop to check login status
+  user?: TexaUser | null; // Add user prop to check login status
   onBuyClick?: () => void;
 }
 
@@ -78,6 +78,7 @@ const ToolCard: React.FC<ToolCardProps> = ({ tool, hasAccess, user, onBuyClick }
   const [showSubscribePopup, setShowSubscribePopup] = useState(false);
   const [showVideoPopup, setShowVideoPopup] = useState(false);
   const [showExtensionWarning, setShowExtensionWarning] = useState(false);
+  const [showLoginPrompt, setShowLoginPrompt] = useState(false); // Login prompt popup
   const [settings, setSettings] = useState<SubscriptionSettings>(DEFAULT_SETTINGS);
   const [selectedPackage, setSelectedPackage] = useState<SubscriptionPackage | null>(null);
 
@@ -85,7 +86,7 @@ const ToolCard: React.FC<ToolCardProps> = ({ tool, hasAccess, user, onBuyClick }
   const embedUrl = parseYouTubeUrl(tool.embedVideoUrl || '');
 
   // Register popup states to hide/show header/footer
-  usePopupState(showSubscribePopup || showVideoPopup || showExtensionWarning);
+  usePopupState(showSubscribePopup || showVideoPopup || showExtensionWarning || showLoginPrompt);
 
   // Subscribe to settings
   useEffect(() => {
@@ -151,11 +152,11 @@ const ToolCard: React.FC<ToolCardProps> = ({ tool, hasAccess, user, onBuyClick }
     if (!hasAccess) {
       // Check if user is logged in first
       if (!user) {
-        // User not logged in - redirect to login page
-        navigate('/login');
+        // User not logged in, show login prompt
+        setShowLoginPrompt(true);
         return;
       }
-      // User is logged in but no subscription - show subscription popup
+      // User is logged in but no subscription, show subscription popup
       setShowSubscribePopup(true);
       return;
     }
@@ -227,15 +228,15 @@ const ToolCard: React.FC<ToolCardProps> = ({ tool, hasAccess, user, onBuyClick }
 
   return (
     <>
-      <div className="glass group rounded-[16px] md:rounded-[32px] overflow-hidden hover:border-indigo-500/40 transition-all duration-500 hover:translate-y-[-5px] flex flex-col h-full relative smooth-animate">
-        <div className="relative h-24 md:h-56 overflow-hidden">
+      <div className="glass group rounded-[24px] md:rounded-[32px] overflow-hidden hover:border-indigo-500/40 transition-all duration-500 hover:translate-y-[-5px] flex flex-col h-full relative smooth-animate">
+        <div className="relative h-48 md:h-56 overflow-hidden">
           <img
             src={tool.imageUrl}
             alt={tool.name}
             className="w-full h-full object-cover group-hover:scale-105 transition-transform duration-700"
             loading="lazy"
           />
-          <div className="absolute top-1.5 left-1.5 md:top-4 md:left-4 px-1.5 md:px-3 py-0.5 md:py-1 bg-black/60 backdrop-blur-xl rounded-full text-[6px] md:text-[10px] font-black uppercase tracking-widest text-indigo-300 border border-white/10">
+          <div className="absolute top-3 left-3 md:top-4 md:left-4 px-3 py-1 bg-black/60 backdrop-blur-xl rounded-full text-[8px] md:text-[10px] font-black uppercase tracking-widest text-indigo-300 border border-white/10">
             {tool.category}
           </div>
 
@@ -252,10 +253,10 @@ const ToolCard: React.FC<ToolCardProps> = ({ tool, hasAccess, user, onBuyClick }
               <div className="absolute inset-0 bg-black/0 group-hover/play:bg-black/30 transition-all duration-300" />
 
               {/* Play Button - Very Small & Transparent by default, visible on hover */}
-              <div className="relative w-6 h-6 md:w-12 md:h-12 rounded-full bg-black/10 border border-white/10 flex items-center justify-center transition-all duration-300 opacity-40 group-hover/play:opacity-100 group-hover/play:scale-110 group-hover/play:bg-black/50 group-hover/play:border-white/40 group-hover/play:shadow-xl">
+              <div className="relative w-10 h-10 md:w-12 md:h-12 rounded-full bg-black/10 border border-white/10 flex items-center justify-center transition-all duration-300 opacity-40 group-hover/play:opacity-100 group-hover/play:scale-110 group-hover/play:bg-black/50 group-hover/play:border-white/40 group-hover/play:shadow-xl">
                 {/* Play Icon - Subtle */}
                 <svg
-                  className="w-2.5 h-2.5 md:w-5 md:h-5 text-white/80 ml-0.5 group-hover/play:text-white transition-all"
+                  className="w-4 h-4 md:w-5 md:h-5 text-white/80 ml-0.5 group-hover/play:text-white transition-all"
                   fill="currentColor"
                   viewBox="0 0 24 24"
                 >
@@ -263,9 +264,9 @@ const ToolCard: React.FC<ToolCardProps> = ({ tool, hasAccess, user, onBuyClick }
                 </svg>
               </div>
 
-              {/* Small Video Badge at corner - hidden on mobile */}
-              <div className="absolute bottom-1.5 right-1.5 md:bottom-3 md:right-3 px-1 md:px-2 py-0.5 md:py-1 bg-black/50 backdrop-blur-sm rounded-md text-[6px] md:text-[9px] font-bold text-white/70 hidden md:flex items-center gap-1 opacity-60 group-hover/play:opacity-100 transition-all">
-                <svg className="w-2 h-2 md:w-3 md:h-3" fill="currentColor" viewBox="0 0 24 24">
+              {/* Small Video Badge at corner instead of pulse animation */}
+              <div className="absolute bottom-3 right-3 px-2 py-1 bg-black/50 backdrop-blur-sm rounded-md text-[9px] font-bold text-white/70 flex items-center gap-1 opacity-60 group-hover/play:opacity-100 transition-all">
+                <svg className="w-3 h-3" fill="currentColor" viewBox="0 0 24 24">
                   <path d="M8 5v14l11-7z" />
                 </svg>
                 Video
@@ -275,28 +276,28 @@ const ToolCard: React.FC<ToolCardProps> = ({ tool, hasAccess, user, onBuyClick }
 
           {/* Video Badge - Only show if no play button */}
           {tool.embedVideoUrl && !embedUrl && (
-            <div className="absolute top-1.5 right-1.5 md:top-4 md:right-4 px-1.5 md:px-2 py-0.5 md:py-1 bg-purple-600/80 backdrop-blur-xl rounded-full text-[6px] md:text-[8px] font-bold text-white flex items-center gap-0.5 md:gap-1">
-              🎬 <span className="hidden md:inline">Video</span>
+            <div className="absolute top-3 right-3 md:top-4 md:right-4 px-2 py-1 bg-purple-600/80 backdrop-blur-xl rounded-full text-[8px] font-bold text-white flex items-center gap-1">
+              🎬 Video
             </div>
           )}
         </div>
 
-        <div className="p-2 md:p-7 flex-grow flex flex-col relative">
-          <h3 className="text-[10px] md:text-2xl font-black mb-0.5 md:mb-3 group-hover:text-indigo-400 transition-colors tracking-tight line-clamp-1">{tool.name}</h3>
-          <p className="text-slate-400 text-[7px] md:text-sm mb-2 md:mb-6 line-clamp-2 font-medium leading-relaxed hidden md:block">
+        <div className="p-5 md:p-7 flex-grow flex flex-col relative">
+          <h3 className="text-xl md:text-2xl font-black mb-2 md:mb-3 group-hover:text-indigo-400 transition-colors tracking-tight">{tool.name}</h3>
+          <p className="text-slate-400 text-xs md:text-sm mb-6 line-clamp-2 font-medium leading-relaxed">
             {tool.description}
           </p>
 
-          <div className="mt-auto pt-1.5 md:pt-6 border-t border-white/5 flex flex-col md:flex-row items-start md:items-center justify-between gap-1 md:gap-0">
+          <div className="mt-auto pt-4 md:pt-6 border-t border-white/5 flex items-center justify-between">
             <div className="flex flex-col">
-              <span className="text-[6px] md:text-[10px] text-slate-500 uppercase font-black tracking-widest hidden md:block">Mulai</span>
-              <span className="text-[8px] md:text-lg font-black text-white leading-none">{formatIDR(tool.priceMonthly)}</span>
+              <span className="text-[8px] md:text-[10px] text-slate-500 uppercase font-black tracking-widest">Mulai</span>
+              <span className="text-sm md:text-lg font-black text-white leading-none">{formatIDR(tool.priceMonthly)}</span>
             </div>
 
             <button
               disabled={injecting}
               onClick={handleOpenTool}
-              className={`px-2 md:px-6 py-1.5 md:py-3 rounded-lg md:rounded-2xl font-black text-[7px] md:text-sm transition-all flex items-center gap-1 md:gap-2 active:scale-95 smooth-animate w-full md:w-auto justify-center ${injecting
+              className={`px-4 md:px-6 py-2.5 md:py-3 rounded-xl md:rounded-2xl font-black text-[10px] md:text-sm transition-all flex items-center gap-2 active:scale-95 smooth-animate ${injecting
                 ? 'bg-amber-500/20 text-amber-400'
                 : hasAccess
                   ? 'bg-gradient-to-r from-emerald-600 to-teal-600 hover:from-emerald-500 hover:to-teal-500 text-white shadow-lg shadow-emerald-900/40'
@@ -305,13 +306,13 @@ const ToolCard: React.FC<ToolCardProps> = ({ tool, hasAccess, user, onBuyClick }
             >
               {injecting ? (
                 <>
-                  <div className="w-3 h-3 md:w-4 md:h-4 border-2 border-amber-400 border-t-transparent rounded-full animate-spin"></div>
-                  <span className="hidden md:inline">Proses...</span>
+                  <div className="w-4 h-4 border-2 border-amber-400 border-t-transparent rounded-full animate-spin"></div>
+                  Proses...
                 </>
               ) : hasAccess ? (
-                <><span className="md:hidden">🚀</span><span className="hidden md:inline">🚀 Open</span></>
+                <>🚀 Open Tools</>
               ) : (
-                <><span className="md:hidden">🛒</span><span className="hidden md:inline">🛒 Beli</span></>
+                <>🛒 Beli</>
               )}
             </button>
           </div>
@@ -508,6 +509,86 @@ const ToolCard: React.FC<ToolCardProps> = ({ tool, hasAccess, user, onBuyClick }
         onClose={() => setShowExtensionWarning(false)}
         toolName={tool.name}
       />
+
+      {/* Login Prompt Popup */}
+      {showLoginPrompt && (
+        <div className="fixed inset-0 z-[100] flex items-center justify-center p-4 bg-black/80 backdrop-blur-md">
+          <div className="glass rounded-[32px] p-8 max-w-md w-full border border-white/20 shadow-2xl relative">
+            {/* Close button */}
+            <button
+              onClick={() => setShowLoginPrompt(false)}
+              className="absolute top-4 right-4 w-10 h-10 rounded-full glass border border-white/10 flex items-center justify-center text-slate-400 hover:text-white transition-colors"
+            >
+              ✕
+            </button>
+
+            {/* Header */}
+            <div className="text-center mb-8">
+              <div className="w-20 h-20 bg-gradient-to-br from-indigo-500 to-purple-600 rounded-3xl mx-auto mb-4 flex items-center justify-center shadow-xl">
+                <span className="text-4xl">🔐</span>
+              </div>
+              <h2 className="text-2xl font-black text-white mb-2">
+                Login Dulu, Yuk!
+              </h2>
+              <p className="text-slate-400 text-sm max-w-sm mx-auto">
+                Untuk melanjutkan pembelian paket <span className="text-indigo-400 font-bold">{tool.name}</span>, kamu perlu masuk ke akun TEXA terlebih dahulu.
+              </p>
+            </div>
+
+            {/* Tool Preview */}
+            <div className="glass rounded-2xl p-4 mb-6 border border-white/10 flex items-center gap-4">
+              <img src={tool.imageUrl} alt={tool.name} className="w-14 h-14 rounded-xl object-cover" />
+              <div>
+                <h3 className="font-bold text-white text-sm">{tool.name}</h3>
+                <p className="text-xs text-slate-400">{tool.category}</p>
+              </div>
+            </div>
+
+            {/* Benefits */}
+            <div className="space-y-3 mb-6">
+              <div className="flex items-center gap-3 text-sm text-slate-300">
+                <span className="w-6 h-6 rounded-full bg-emerald-500/20 flex items-center justify-center text-emerald-400 text-xs">✓</span>
+                <span>Akses semua AI Tools premium</span>
+              </div>
+              <div className="flex items-center gap-3 text-sm text-slate-300">
+                <span className="w-6 h-6 rounded-full bg-emerald-500/20 flex items-center justify-center text-emerald-400 text-xs">✓</span>
+                <span>Proses pembayaran yang aman</span>
+              </div>
+              <div className="flex items-center gap-3 text-sm text-slate-300">
+                <span className="w-6 h-6 rounded-full bg-emerald-500/20 flex items-center justify-center text-emerald-400 text-xs">✓</span>
+                <span>Riwayat langganan tersimpan</span>
+              </div>
+            </div>
+
+            {/* CTA Buttons */}
+            <div className="space-y-3">
+              <button
+                onClick={() => {
+                  setShowLoginPrompt(false);
+                  navigate('/login');
+                }}
+                className="w-full py-4 rounded-2xl bg-gradient-to-r from-indigo-600 to-purple-600 hover:from-indigo-500 hover:to-purple-500 text-white font-black text-base transition-all shadow-xl shadow-indigo-900/40 flex items-center justify-center gap-2"
+              >
+                🚀 Masuk / Daftar Sekarang
+              </button>
+
+              <button
+                onClick={() => setShowLoginPrompt(false)}
+                className="w-full py-3 rounded-2xl glass border border-white/10 text-slate-400 font-bold text-sm hover:border-white/20 hover:text-white transition-all"
+              >
+                Nanti Saja
+              </button>
+            </div>
+
+            {/* Security Badge */}
+            <div className="mt-6 text-center">
+              <p className="text-[10px] text-slate-500 flex items-center justify-center gap-2">
+                🔒 Login aman dengan Google atau Email
+              </p>
+            </div>
+          </div>
+        </div>
+      )}
     </>
   );
 };
