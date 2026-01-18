@@ -227,15 +227,15 @@ const ToolCard: React.FC<ToolCardProps> = ({ tool, hasAccess, user, onBuyClick }
     setShowSubscribePopup(false);
   };
 
-  // Get unique color for each category
+  // Get unique color for each category - Bright vibrant gradients
   const categoryColors: Record<string, { border: string; gradient: string }> = {
-    'AI Chat': { border: '#4F46E5', gradient: 'linear-gradient(145deg, #4F46E5, #000)' },
-    'AI Image': { border: '#10B981', gradient: 'linear-gradient(210deg, #10B981, #000)' },
-    'AI Video': { border: '#F59E0B', gradient: 'linear-gradient(165deg, #F59E0B, #000)' },
-    'AI Audio': { border: '#EF4444', gradient: 'linear-gradient(195deg, #EF4444, #000)' },
-    'AI Code': { border: '#8B5CF6', gradient: 'linear-gradient(225deg, #8B5CF6, #000)' },
-    'AI Writing': { border: '#06B6D4', gradient: 'linear-gradient(135deg, #06B6D4, #000)' },
-    'default': { border: '#6366f1', gradient: 'linear-gradient(145deg, #6366f1, #000)' }
+    'AI Chat': { border: '#6366f1', gradient: 'linear-gradient(145deg, #6366f1, #8b5cf6)' },
+    'AI Image': { border: '#10B981', gradient: 'linear-gradient(145deg, #10B981, #34d399)' },
+    'AI Video': { border: '#F59E0B', gradient: 'linear-gradient(145deg, #F59E0B, #fbbf24)' },
+    'AI Audio': { border: '#EF4444', gradient: 'linear-gradient(145deg, #EF4444, #f87171)' },
+    'AI Code': { border: '#8B5CF6', gradient: 'linear-gradient(145deg, #8B5CF6, #a78bfa)' },
+    'AI Writing': { border: '#06B6D4', gradient: 'linear-gradient(145deg, #06B6D4, #22d3ee)' },
+    'default': { border: '#6366f1', gradient: 'linear-gradient(145deg, #6366f1, #8b5cf6)' }
   };
 
   const cardColors = categoryColors[tool.category] || categoryColors['default'];
