@@ -8,9 +8,24 @@ import UserProfile from './components/UserProfile';
 import Login from './components/Login';
 import Hero from './components/Hero';
 import ToolIframePage from './components/ToolIframePage';
+import Aurora from './components/Aurora';
 import { onAuthChange, logOut, TexaUser } from './services/firebase';
 import { PopupProvider, usePopup } from './services/popupContext';
+import { ThemeProvider, useTheme, AURORA_COLORS } from './services/themeContext';
 import toketHtml from './tambahan/toket.txt?raw';
+
+// Aurora Background wrapper that uses theme colors
+const AuroraBackground: React.FC = () => {
+  const { theme } = useTheme();
+  return (
+    <Aurora
+      colorStops={AURORA_COLORS[theme]}
+      amplitude={1.2}
+      blend={0.5}
+      speed={0.8}
+    />
+  );
+};
 
 // Inner component that has access to useLocation
 const AppContent: React.FC<{
@@ -33,6 +48,8 @@ const AppContent: React.FC<{
 
   return (
     <div className="min-h-screen flex flex-col relative">
+      {/* Aurora Background */}
+      <AuroraBackground />
 
       {/* Conditionally render Navbar - hidden on admin/login pages and when popup is open */}
       <div
@@ -215,11 +232,13 @@ const App: React.FC = () => {
   }
 
   return (
-    <Router>
-      <PopupProvider>
-        <AppContent user={user} onLogin={handleLogin} onLogout={handleLogout} />
-      </PopupProvider>
-    </Router>
+    <ThemeProvider>
+      <Router>
+        <PopupProvider>
+          <AppContent user={user} onLogin={handleLogin} onLogout={handleLogout} />
+        </PopupProvider>
+      </Router>
+    </ThemeProvider>
   );
 };
 
