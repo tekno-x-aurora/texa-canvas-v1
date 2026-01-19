@@ -193,22 +193,28 @@
     }
 }
 
-/* Info footer - Transparent glass */
+/* Info footer - Pure Transparent Glass Frame */
 .chroma-info {
     position: relative;
     padding: 10px;
-    background: rgba(255, 255, 255, 0.08);
-    backdrop-filter: blur(12px);
-    -webkit-backdrop-filter: blur(12px);
+    background: transparent;
+    backdrop-filter: blur(20px) saturate(180%);
+    -webkit-backdrop-filter: blur(20px) saturate(180%);
     flex-grow: 1;
     display: flex;
     flex-direction: column;
-    border-top: 1px solid rgba(255, 255, 255, 0.15);
+    border-top: 1px solid rgba(255, 255, 255, 0.2);
+    /* Glass frame border */
+    border-left: 1px solid rgba(255, 255, 255, 0.1);
+    border-right: 1px solid rgba(255, 255, 255, 0.1);
+    border-bottom: 1px solid rgba(255, 255, 255, 0.1);
+    border-radius: 0 0 16px 16px;
 }
 
 @media (min-width: 768px) {
     .chroma-info {
         padding: 18px;
+        border-radius: 0 0 24px 24px;
     }
 }
 
