@@ -1,4 +1,4 @@
-/* ChromaGrid Style Cards - Bright & Elegant Glass Design */
+/* ChromaGrid Style Cards - Transparent Glass Design */
 
 .chroma-grid {
     --r: 300px;
@@ -14,19 +14,15 @@
     position: relative;
     border-radius: 28px;
 
-    /* Bright Glass background */
-    background: linear-gradient(135deg,
-            rgba(255, 255, 255, 0.25) 0%,
-            rgba(255, 255, 255, 0.15) 50%,
-            rgba(255, 255, 255, 0.2) 100%);
-    backdrop-filter: blur(24px) saturate(200%);
-    -webkit-backdrop-filter: blur(24px) saturate(200%);
-    border: 1px solid rgba(255, 255, 255, 0.4);
+    /* Transparent Glass background */
+    background: rgba(255, 255, 255, 0.08);
+    backdrop-filter: blur(20px) saturate(180%);
+    -webkit-backdrop-filter: blur(20px) saturate(180%);
+    border: 1px solid rgba(255, 255, 255, 0.15);
     box-shadow:
-        0 8px 32px rgba(99, 102, 241, 0.15),
-        0 4px 16px rgba(139, 92, 246, 0.1),
-        inset 0 1px 0 rgba(255, 255, 255, 0.6),
-        inset 0 -1px 0 rgba(255, 255, 255, 0.2);
+        0 8px 32px rgba(0, 0, 0, 0.1),
+        inset 0 1px 0 rgba(255, 255, 255, 0.2),
+        inset 0 -1px 0 rgba(255, 255, 255, 0.05);
 }
 
 @media (min-width: 768px) {
@@ -37,10 +33,10 @@
     }
 }
 
-/* Chroma Card - Bright Glass */
+/* Chroma Card - Pure Transparent Glass */
 .chroma-card {
-    --card-border: #4F46E5;
-    --card-gradient: linear-gradient(145deg, #4F46E5, #8B5CF6);
+    --card-border: #6366f1;
+    --card-gradient: linear-gradient(145deg, #6366f1, #8b5cf6);
     --mouse-x: 50%;
     --mouse-y: 50%;
 
@@ -53,15 +49,14 @@
         box-shadow 0.4s cubic-bezier(0.25, 0.8, 0.25, 1);
     cursor: pointer;
 
-    /* Bright Glass card background */
-    background: linear-gradient(180deg,
-            rgba(255, 255, 255, 0.9) 0%,
-            rgba(255, 255, 255, 0.7) 100%);
-    border: 1px solid rgba(255, 255, 255, 0.8);
+    /* Transparent Glass card */
+    background: rgba(255, 255, 255, 0.1);
+    backdrop-filter: blur(16px) saturate(150%);
+    -webkit-backdrop-filter: blur(16px) saturate(150%);
+    border: 1px solid rgba(255, 255, 255, 0.2);
     box-shadow:
-        0 4px 20px rgba(99, 102, 241, 0.12),
-        0 2px 8px rgba(0, 0, 0, 0.05),
-        inset 0 1px 0 rgba(255, 255, 255, 1);
+        0 4px 24px rgba(0, 0, 0, 0.08),
+        inset 0 1px 0 rgba(255, 255, 255, 0.3);
 }
 
 @media (min-width: 768px) {
@@ -70,17 +65,17 @@
     }
 }
 
-/* Gradient border effect - Brighter */
+/* Gradient border effect */
 .chroma-card::before {
     content: '';
     position: absolute;
     inset: 0;
     border-radius: inherit;
-    padding: 2px;
+    padding: 1px;
     background: linear-gradient(135deg,
-            var(--card-border) 0%,
-            rgba(255, 255, 255, 0.8) 50%,
-            var(--card-border) 100%);
+            rgba(255, 255, 255, 0.4) 0%,
+            var(--card-border) 50%,
+            rgba(255, 255, 255, 0.4) 100%);
     -webkit-mask:
         linear-gradient(#fff 0 0) content-box,
         linear-gradient(#fff 0 0);
@@ -90,7 +85,7 @@
     -webkit-mask-composite: xor;
     mask-composite: exclude;
     pointer-events: none;
-    opacity: 0.6;
+    opacity: 0.5;
     transition: opacity 0.3s ease;
 }
 
@@ -98,13 +93,13 @@
     opacity: 1;
 }
 
-/* Mouse glow effect - Softer for bright theme */
+/* Mouse glow effect */
 .chroma-card::after {
     content: '';
     position: absolute;
     inset: 0;
     background: radial-gradient(350px circle at var(--mouse-x) var(--mouse-y),
-            rgba(99, 102, 241, 0.15),
+            rgba(255, 255, 255, 0.15),
             transparent 40%);
     pointer-events: none;
     opacity: 0;
@@ -118,11 +113,11 @@
 
 .chroma-card:hover {
     transform: translateY(-6px) scale(1.02);
+    background: rgba(255, 255, 255, 0.15);
     box-shadow:
-        0 20px 40px rgba(99, 102, 241, 0.2),
-        0 8px 16px rgba(139, 92, 246, 0.15),
-        0 0 0 1px var(--card-border),
-        inset 0 1px 0 rgba(255, 255, 255, 1);
+        0 20px 40px rgba(99, 102, 241, 0.15),
+        0 8px 16px rgba(0, 0, 0, 0.1),
+        inset 0 1px 0 rgba(255, 255, 255, 0.4);
 }
 
 @media (min-width: 768px) {
@@ -131,7 +126,7 @@
     }
 }
 
-/* Image wrapper - Brighter overlay */
+/* Image wrapper */
 .chroma-img-wrapper {
     position: relative;
     height: 90px;
@@ -152,8 +147,8 @@
     position: absolute;
     inset: 0;
     background: linear-gradient(to bottom,
-            transparent 40%,
-            rgba(255, 255, 255, 0.3) 100%);
+            transparent 50%,
+            rgba(0, 0, 0, 0.3) 100%);
     z-index: 1;
 }
 
@@ -168,14 +163,14 @@
     transform: scale(1.08);
 }
 
-/* Category badge - Bright elegant */
+/* Category badge - Transparent glass */
 .chroma-badge {
     position: absolute;
     top: 6px;
     left: 6px;
     z-index: 5;
     padding: 3px 8px;
-    background: rgba(255, 255, 255, 0.9);
+    background: rgba(255, 255, 255, 0.2);
     backdrop-filter: blur(12px);
     -webkit-backdrop-filter: blur(12px);
     border-radius: 10px;
@@ -183,8 +178,9 @@
     font-weight: 800;
     text-transform: uppercase;
     letter-spacing: 0.05em;
-    border: 1px solid rgba(255, 255, 255, 0.6);
-    box-shadow: 0 2px 8px rgba(0, 0, 0, 0.08);
+    color: #fff;
+    border: 1px solid rgba(255, 255, 255, 0.3);
+    text-shadow: 0 1px 2px rgba(0, 0, 0, 0.3);
 }
 
 @media (min-width: 768px) {
@@ -197,19 +193,17 @@
     }
 }
 
-/* Info footer - Light glass */
+/* Info footer - Transparent glass */
 .chroma-info {
     position: relative;
     padding: 10px;
-    background: linear-gradient(180deg,
-            rgba(255, 255, 255, 0.95) 0%,
-            rgba(248, 250, 252, 0.98) 100%);
+    background: rgba(255, 255, 255, 0.08);
     backdrop-filter: blur(12px);
     -webkit-backdrop-filter: blur(12px);
     flex-grow: 1;
     display: flex;
     flex-direction: column;
-    border-top: 1px solid rgba(255, 255, 255, 0.8);
+    border-top: 1px solid rgba(255, 255, 255, 0.15);
 }
 
 @media (min-width: 768px) {
@@ -221,12 +215,13 @@
 .chroma-info .name {
     font-size: 11px;
     font-weight: 800;
-    color: #1e293b;
+    color: #fff;
     margin: 0 0 3px;
     letter-spacing: -0.02em;
     white-space: nowrap;
     overflow: hidden;
     text-overflow: ellipsis;
+    text-shadow: 0 1px 2px rgba(0, 0, 0, 0.2);
 }
 
 @media (min-width: 768px) {
@@ -241,6 +236,7 @@
     color: var(--card-border);
     font-weight: 800;
     margin-bottom: 6px;
+    text-shadow: 0 0 10px var(--card-border);
 }
 
 @media (min-width: 768px) {
@@ -252,7 +248,7 @@
 
 .chroma-info .role {
     font-size: 8px;
-    color: #64748b;
+    color: rgba(255, 255, 255, 0.7);
     margin: 0;
     font-weight: 500;
     display: none;
@@ -287,7 +283,9 @@
     transition: all 0.3s ease;
     background: var(--card-gradient);
     color: #fff;
-    box-shadow: 0 4px 12px rgba(99, 102, 241, 0.3);
+    box-shadow:
+        0 4px 12px rgba(99, 102, 241, 0.4),
+        inset 0 1px 0 rgba(255, 255, 255, 0.2);
 }
 
 @media (min-width: 768px) {
@@ -300,40 +298,44 @@
 }
 
 .chroma-action:hover {
-    filter: brightness(1.1);
+    filter: brightness(1.15);
     transform: translateY(-2px);
-    box-shadow: 0 6px 20px rgba(99, 102, 241, 0.4);
+    box-shadow:
+        0 8px 24px rgba(99, 102, 241, 0.5),
+        inset 0 1px 0 rgba(255, 255, 255, 0.3);
 }
 
 .chroma-action.success {
     background: linear-gradient(135deg, #10b981 0%, #059669 100%);
-    box-shadow: 0 4px 12px rgba(16, 185, 129, 0.3);
+    box-shadow:
+        0 4px 12px rgba(16, 185, 129, 0.4),
+        inset 0 1px 0 rgba(255, 255, 255, 0.2);
 }
 
 .chroma-action.success:hover {
-    box-shadow: 0 6px 20px rgba(16, 185, 129, 0.4);
+    box-shadow:
+        0 8px 24px rgba(16, 185, 129, 0.5),
+        inset 0 1px 0 rgba(255, 255, 255, 0.3);
 }
 
-/* Spotlight overlay - Lighter */
+/* Spotlight overlay */
 .chroma-overlay {
     position: absolute;
     inset: 0;
     pointer-events: none;
     background: radial-gradient(circle var(--r) at var(--x) var(--y),
-            transparent 0%,
-            rgba(99, 102, 241, 0.08) 100%);
+            rgba(255, 255, 255, 0.1) 0%,
+            transparent 60%);
     border-radius: inherit;
     z-index: 50;
 }
 
-/* Fade overlay - Very subtle */
+/* Fade overlay */
 .chroma-fade {
     position: absolute;
     inset: 0;
     pointer-events: none;
-    background: linear-gradient(135deg,
-            rgba(99, 102, 241, 0.03) 0%,
-            rgba(139, 92, 246, 0.03) 100%);
+    background: transparent;
     border-radius: inherit;
     z-index: 51;
     opacity: 1;
