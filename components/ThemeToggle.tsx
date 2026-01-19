@@ -8,9 +8,9 @@ export default function ThemeToggle() {
     return (
         <button
             onClick={toggleTheme}
-            className={`fixed top-3 right-3 md:top-4 md:right-4 z-[200] w-9 h-9 md:w-10 md:h-10 rounded-full shadow-lg flex items-center justify-center transition-all duration-300 backdrop-blur-xl border ${isDark
-                    ? 'bg-slate-900/80 border-white/10 hover:bg-slate-800/90'
-                    : 'bg-white/80 border-black/10 hover:bg-white/95'
+            className={`fixed top-16 right-3 md:top-4 md:right-4 z-[200] w-8 h-8 md:w-10 md:h-10 rounded-full shadow-lg flex items-center justify-center transition-all duration-300 backdrop-blur-xl border ${isDark
+                ? 'bg-slate-900/80 border-white/10 hover:bg-slate-800/90'
+                : 'bg-white/80 border-black/10 hover:bg-white/95'
                 }`}
             aria-label={`Switch to ${isDark ? 'light' : 'dark'} theme`}
         >
