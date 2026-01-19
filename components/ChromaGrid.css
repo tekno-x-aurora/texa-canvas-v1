@@ -46,7 +46,7 @@
     display: flex;
     flex-direction: column;
     border-radius: 16px;
-    overflow: visible;
+    overflow: hidden;
     cursor: pointer;
 
     /* 3D Perspective */
