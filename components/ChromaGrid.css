@@ -33,21 +33,27 @@
     }
 }
 
-/* Chroma Card - Pure Transparent Glass */
+/* Chroma Card - 3D Glass Effect */
 .chroma-card {
     --card-border: #6366f1;
     --card-gradient: linear-gradient(145deg, #6366f1, #8b5cf6);
     --mouse-x: 50%;
     --mouse-y: 50%;
+    --rotate-x: 0deg;
+    --rotate-y: 0deg;
 
     position: relative;
     display: flex;
     flex-direction: column;
     border-radius: 16px;
-    overflow: hidden;
-    transition: transform 0.4s cubic-bezier(0.25, 0.8, 0.25, 1),
-        box-shadow 0.4s cubic-bezier(0.25, 0.8, 0.25, 1);
+    overflow: visible;
     cursor: pointer;
+
+    /* 3D Perspective */
+    transform-style: preserve-3d;
+    perspective: 1000px;
+    transform: perspective(1000px) rotateX(var(--rotate-x)) rotateY(var(--rotate-y)) translateZ(0);
+    transition: transform 0.15s ease-out, box-shadow 0.3s ease;
 
     /* Transparent Glass card */
     background: rgba(255, 255, 255, 0.1);
@@ -112,17 +118,19 @@
 }
 
 .chroma-card:hover {
-    transform: translateY(-6px) scale(1.02);
-    background: rgba(255, 255, 255, 0.15);
+    /* 3D Elevation - rises up and tilts */
+    transform: perspective(1000px) rotateX(var(--rotate-x)) rotateY(var(--rotate-y)) translateZ(50px);
+    background: rgba(255, 255, 255, 0.18);
     box-shadow:
-        0 20px 40px rgba(99, 102, 241, 0.15),
-        0 8px 16px rgba(0, 0, 0, 0.1),
-        inset 0 1px 0 rgba(255, 255, 255, 0.4);
+        0 30px 60px rgba(0, 0, 0, 0.25),
+        0 15px 30px rgba(99, 102, 241, 0.2),
+        0 0 0 1px rgba(255, 255, 255, 0.3),
+        inset 0 1px 0 rgba(255, 255, 255, 0.5);
 }
 
 @media (min-width: 768px) {
     .chroma-card:hover {
-        transform: translateY(-10px) scale(1.02);
+        transform: perspective(1000px) rotateX(var(--rotate-x)) rotateY(var(--rotate-y)) translateZ(80px);
     }
 }
 

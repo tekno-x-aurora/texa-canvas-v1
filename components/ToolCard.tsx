@@ -240,13 +240,31 @@ const ToolCard: React.FC<ToolCardProps> = ({ tool, hasAccess, user, onBuyClick }
 
   const cardColors = categoryColors[tool.category] || categoryColors['default'];
 
+  // 3D Tilt effect handler
   const handleCardMove = (e: React.MouseEvent<HTMLElement>) => {
     const card = e.currentTarget;
     const rect = card.getBoundingClientRect();
     const x = e.clientX - rect.left;
     const y = e.clientY - rect.top;
+    const centerX = rect.width / 2;
+    const centerY = rect.height / 2;
+
+    // Calculate rotation angles (max 15 degrees)
+    const rotateX = ((y - centerY) / centerY) * -15;
+    const rotateY = ((x - centerX) / centerX) * 15;
+
+    // Set CSS variables for 3D transform
     card.style.setProperty('--mouse-x', `${x}px`);
     card.style.setProperty('--mouse-y', `${y}px`);
+    card.style.setProperty('--rotate-x', `${rotateX}deg`);
+    card.style.setProperty('--rotate-y', `${rotateY}deg`);
+  };
+
+  const handleCardLeave = (e: React.MouseEvent<HTMLElement>) => {
+    const card = e.currentTarget;
+    // Reset to flat position
+    card.style.setProperty('--rotate-x', '0deg');
+    card.style.setProperty('--rotate-y', '0deg');
   };
 
   return (
@@ -254,9 +272,12 @@ const ToolCard: React.FC<ToolCardProps> = ({ tool, hasAccess, user, onBuyClick }
       <article
         className="chroma-card"
         onMouseMove={handleCardMove}
+        onMouseLeave={handleCardLeave}
         style={{
           '--card-border': cardColors.border,
-          '--card-gradient': cardColors.gradient
+          '--card-gradient': cardColors.gradient,
+          '--rotate-x': '0deg',
+          '--rotate-y': '0deg'
         } as React.CSSProperties}
       >
         {/* Image Wrapper */}
